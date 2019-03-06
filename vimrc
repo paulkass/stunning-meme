@@ -1,4 +1,7 @@
-autocmd FileType ruby compiler ruby 
+augroup initialRubyCompilerGroup
+    autocmd!
+    autocmd FileType ruby compiler ruby 
+augroup END
 
 let mapleader = "\\"
 
@@ -33,11 +36,17 @@ set splitright
 
 " Some autocommand conveniences
 " Python
-autocmd FileType python     :iabbrev <buffer> iff if:<left>
-autocmd FileType python     :iabbrev <buffer> ret return
+augroup pythonAbbrevs
+    autocmd!
+    autocmd FileType python     :iabbrev <buffer> iff if:<left>
+    autocmd FileType python     :iabbrev <buffer> ret return
+augroup END
 
 " Ruby
-autocmd FileType ruby       :iabbrev <buffer> doend do<CR><CR>end<up><space>
+augroup rubyAbbrevs
+    autocmd!
+    autocmd FileType ruby       :iabbrev <buffer> doend do<CR><CR>end<up><space>
+augroup END
 
 " Syntastic Commands
 set statusline+=%#warningmsg#
