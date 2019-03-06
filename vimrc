@@ -31,6 +31,14 @@ nnoremap <leader>sv :source $MYVIMRC<cr>
 set splitbelow
 set splitright
 
+" Some autocommand conveniences
+" Python
+autocmd FileType python     :iabbrev <buffer> iff if:<left>
+autocmd FileType python     :iabbrev <buffer> ret return
+
+" Ruby
+autocmd FileType ruby       :iabbrev <buffer> doend do<CR><CR>end<up><space>
+
 " Syntastic Commands
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
