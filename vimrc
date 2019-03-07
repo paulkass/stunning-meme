@@ -36,14 +36,25 @@ set splitright
 
 " Vim Spelling Enabled for Text files
 
-autocmd BufReadPre,BufNewFile *.txt :setlocal spell spelllang=en_us
+augroup spellingEnabled
+    autocmd!
+    autocmd BufReadPre,BufNewFile *.txt :setlocal spell spelllang=en_us
+augroup END
 
 " Some comment commands
 "
 " Comment commands mapping to <localleader>c
 
-autocmd FileType python,ruby nnoremap <buffer> <localleader>c I#<esc>
-autocmd FileType vim nnoremap <buffer> <localleader>c I"<esc>
+augroup commendMaps
+    autocmd!
+    autocmd FileType python,ruby nnoremap <buffer> <localleader>c I#<esc>
+    autocmd FileType vim nnoremap <buffer> <localleader>c I"<esc>
+augroup END
+
+" Delete till quote commands
+
+nnoremap <localleader>' dt' 
+nnoremap <localleader>" dt"
 
 " Some autocommand conveniences
 " Python
