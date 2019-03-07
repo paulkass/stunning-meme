@@ -48,6 +48,18 @@ augroup rubyAbbrevs
     autocmd FileType ruby       :iabbrev <buffer> doend do<CR><CR>end<up><space>
 augroup END
 
+
+" Some Mappings for selecting first and last parentheses
+onoremap <silent> IP :<c-u>normal! f(vi(<CR>
+onoremap <silent> OP :<c-u>normal! f(va(<CR>
+onoremap <silent> LP :<c-u>normal! F)va(<CR>
+
+" Mappings for curly braces
+onoremap <silent> IB :<c-u>normal! f}vi{<CR>
+onoremap <silent> OB :<c-u>normal! f}va{<CR>
+onoremap <silent> LB :<c-u>normal! F{va}<CR>
+
+
 " Syntastic Commands
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
