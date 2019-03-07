@@ -34,6 +34,17 @@ nnoremap <leader>sv :source $MYVIMRC<cr>
 set splitbelow
 set splitright
 
+" Vim Spelling Enabled for Text files
+
+autocmd BufReadPre,BufNewFile *.txt :setlocal spell spelllang=en_us
+
+" Some comment commands
+"
+" Comment commands mapping to <localleader>c
+
+autocmd FileType python,ruby nnoremap <buffer> <localleader>c I#<esc>
+autocmd FileType vim nnoremap <buffer> <localleader>c I"<esc>
+
 " Some autocommand conveniences
 " Python
 augroup pythonAbbrevs
