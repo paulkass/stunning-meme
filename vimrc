@@ -45,7 +45,7 @@ augroup END
 "
 " Comment commands mapping to <localleader>c
 
-augroup commendMaps
+augroup commentMaps
     autocmd!
     autocmd FileType python,ruby nnoremap <buffer> <localleader>c I#<esc>
     autocmd FileType vim nnoremap <buffer> <localleader>c I"<esc>
@@ -70,6 +70,12 @@ augroup rubyAbbrevs
     autocmd FileType ruby       :iabbrev <buffer> doend do<CR><CR>end<up><space>
 augroup END
 
+" Markdown
+augroup markdownAbbrevs
+    autocmd!
+    autocmd FileType markdown   :onoremap ih :<c-u>execute "normal! ?^\\(=\\{2,\\}\\\|-\\{2,\\}\\)$\r:nohlsearch\rkvg_"<cr>
+augroup END
+
 
 " Some Mappings for selecting first and last parentheses
 onoremap <silent> IP :<c-u>normal! f(vi(<CR>
@@ -81,6 +87,8 @@ onoremap <silent> IB :<c-u>normal! f}vi{<CR>
 onoremap <silent> OB :<c-u>normal! f}va{<CR>
 onoremap <silent> LB :<c-u>normal! F{va}<CR>
 
+" Operator Mapping for inside next email
+onoremap <silent> in@ :<c-u>execute "normal! /\\s\\S\\+@\\S\\+\\.\\S\\{2,3\\}\r:nohlsearch\rvawol"<cr>
 
 " Syntastic Commands
 set statusline+=%#warningmsg#
