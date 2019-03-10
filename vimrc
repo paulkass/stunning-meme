@@ -90,10 +90,16 @@ onoremap <silent> LB :<c-u>normal! F{va}<CR>
 " Operator Mapping for inside next email
 onoremap <silent> in@ :<c-u>execute "normal! /\\s\\S\\+@\\S\\+\\.\\S\\{2,3\\}\r:nohlsearch\rvawol"<cr>
 
-" Syntastic Commands
+" Statusline Commands
+set statusline=%t " name of file
+set statusline+=,\ Line:\ %l " line number
+set statusline+=/%-7L " Total lines
+set statusline+=%< " Cutoff mark
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
+set statusline+=%=
+set statusline+=%y
 
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
