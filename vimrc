@@ -24,6 +24,8 @@ let mapleader = "\\"
 
 " Common Abbreviations {{{
 iabbrev edn end
+iabbrev thigns things
+iabbrev shoulnd should
 "}}}
 
 " Basic Setup {{{
@@ -125,7 +127,12 @@ augroup code_folding
     "Ruby {{{
     autocmd FileType ruby setlocal foldmethod=syntax
     autocmd FileType ruby setlocal foldlevelstart=3
-    "}}}h
+    "}}}
+    
+    "Python {{{
+    autocmd FileType python setlocal foldmethod=indent
+    autocmd FileType python setlocal foldlevelstart=0
+    "}}}
 augroup END
 "}}}
 
