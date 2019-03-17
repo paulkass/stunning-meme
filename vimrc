@@ -44,10 +44,10 @@ syntax on
 " Vim Opening Commands {{{
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
 nnoremap <leader>sv :source $MYVIMRC<cr>
+"}}}
 
 " Opens last Buffer in new window
 nnoremap <leader>dv :execute "vsplit ".bufname("#")<CR>
-"}}}
 
 " Folding opening commands
 nnoremap <leader>z za
