@@ -37,6 +37,10 @@ set number relativenumber
 set nu
 colorscheme delek
 syntax on
+
+" Search Options
+set incsearch
+set hlsearch
 "}}}
 
 " Personal Mapping Conveniences {{{
@@ -44,14 +48,26 @@ syntax on
 " Vim Opening Commands {{{
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
 nnoremap <leader>sv :source $MYVIMRC<cr>
-"}}}
 
 " Opens last Buffer in new window
 nnoremap <leader>dv :execute "vsplit ".bufname("#")<CR>
+"}}}
 
 " Folding opening commands
 nnoremap <leader>z za
 nnoremap <leader>Z zA
+
+" Trailing Whitespace Highlight {{{
+highlight trailingWhitespaceGroup ctermbg=DarkMagenta guibg=DarkMagenta
+nnoremap <leader>w :match trailingWhitespaceGroup /\s\+$/<cr>
+nnoremap <leader>W :match none<cr>
+" }}}
+
+" Mapping to do search with very magic regex
+nnoremap <leader>F /\v
+
+" Mapping to clear highlights from last search
+nnoremap <leader>c :nohlsearch
 
 "}}}
 
@@ -117,6 +133,13 @@ augroup END
 augroup javaAbbrevs
     autocmd!
     autocmd FileType java :nnoremap <localleader>f :<c-u>execute "normal! mqA;\e`q"<cr>
+augroup END
+" }}}
+
+" Vim {{{
+augroup vimAbbrevs
+    autocmd!
+     autocmd FileType vim execute "normal! :iabbrev <buffer> \{\{\{ \{\{\{<CR><CR>\}\}\}<Up><BS>\r"
 augroup END
 " }}}
 " autocommand convenience end }}}
