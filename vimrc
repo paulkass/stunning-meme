@@ -78,9 +78,9 @@ augroup commentMaps
 augroup END
 " }}}
 
-" Delete till quote commands {{{
-nnoremap <localleader>' dt' 
-nnoremap <localleader>" dt"
+" Change till quote commands {{{
+nnoremap <localleader>' ct' 
+nnoremap <localleader>" ct"
 "}}}
 
 " Some autocommand conveniences {{{
@@ -103,6 +103,20 @@ augroup END
 augroup markdownAbbrevs
     autocmd!
     autocmd FileType markdown   :onoremap ih :<c-u>execute "normal! ?^\\(=\\{2,\\}\\\|-\\{2,\\}\\)$\r:nohlsearch\rkvg_"<cr>
+augroup END
+" }}}
+
+" Javascript {{{
+augroup javascriptAbbrevs
+    autocmd!
+    autocmd FileType javascript :nnoremap <localleader>f :<c-u>execute "normal! mqA;\e`q"<cr>
+augroup END
+" }}}
+
+" Java {{{
+augroup javaAbbrevs
+    autocmd!
+    autocmd FileType java :nnoremap <localleader>f :<c-u>execute "normal! mqA;\e`q"<cr>
 augroup END
 " }}}
 " autocommand convenience end }}}
