@@ -189,6 +189,12 @@ set statusline+=%=
 set statusline+=%y
 "}}}
 
+" Grep Search commands {{{
+nnoremap <leader>g :silent execute "grep! -R " . shellescape(expand("<cWORD>")) . " ."<cr>:copen 5<cr> 
+nnoremap <leader>cn :cnext
+nnoremap <leader>cp :cprevious
+" }}}
+
 " Plugin Specification for vimplug --- {{{
 if empty(glob('~/.vim/autoload/plug.vim'))
     silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
