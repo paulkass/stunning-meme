@@ -190,9 +190,9 @@ set statusline+=%y
 "}}}
 
 " Grep Search commands {{{
-nnoremap <leader>g :silent execute "grep! -R " . shellescape(expand("<cWORD>")) . " ."<cr>:copen 5<cr> 
-nnoremap <leader>cn :cnext
-nnoremap <leader>cp :cprevious
+"nnoremap <leader>g :silent execute \"grep! -R \" . shellescape(expand("<cWORD>")) . \" .\"<cr>:copen 5<cr> 
+nnoremap <leader>cn :cnext<CR>
+nnoremap <leader>cp :cprevious<CR>
 " }}}
 
 " Plugin Specification for vimplug --- {{{
