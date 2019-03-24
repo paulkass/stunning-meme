@@ -139,7 +139,7 @@ augroup END
 " Vim {{{
 augroup vimAbbrevs
     autocmd!
-     autocmd FileType vim execute "normal! :iabbrev <buffer> \{\{\{ \{\{\{<CR><CR>\}\}\}<Up><BS>\r"
+     autocmd FileType vim silent execute "normal! :iabbrev <buffer> \{\{\{ \{\{\{<CR><CR>\}\}\}<Up><BS>\r"
 augroup END
 " }}}
 " autocommand convenience end }}}
