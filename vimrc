@@ -67,7 +67,7 @@ nnoremap <leader>W :match none<cr>
 nnoremap <leader>F /\v
 
 " Mapping to clear highlights from last search
-nnoremap <leader>C :nohlsearch<CR>
+nnoremap <leader>c :nohlsearch
 
 "}}}
 
@@ -105,6 +105,7 @@ augroup pythonAbbrevs
     autocmd!
     autocmd FileType python     :iabbrev <buffer> iff if:<left>
     autocmd FileType python     :iabbrev <buffer> ret return
+    autocmd Filetype python     :inoremap <buffer> <localleader>pr print()<left>
 augroup END
 " }}}
 
@@ -112,7 +113,6 @@ augroup END
 augroup rubyAbbrevs
     autocmd!
     autocmd FileType ruby       :iabbrev <buffer> doend do<CR><CR>end<up><space>
-    autocmd FileType ruby       :inoremap <localleader>w %w()<left>
 augroup END
 " }}}
 
