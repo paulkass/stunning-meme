@@ -140,7 +140,7 @@ augroup END
 " Vim {{{
 augroup vimAbbrevs
     autocmd!
-     autocmd FileType vim execute "normal! :iabbrev <buffer> \{\{\{ \{\{\{<CR><CR>\}\}\}<Up><BS>\r"
+     autocmd FileType vim silent execute "normal! :iabbrev <buffer> \{\{\{ \{\{\{<CR><CR>\}\}\}<Up><BS>\r"
 augroup END
 " }}}
 " autocommand convenience end }}}
@@ -191,9 +191,9 @@ set statusline+=%y
 "}}}
 
 " Grep Search commands {{{
-nnoremap <leader>g :silent execute "grep! -R " . shellescape(expand("<cWORD>")) . " ."<cr>:copen 5<cr> 
-nnoremap <leader>cn :cnext
-nnoremap <leader>cp :cprevious
+"nnoremap <leader>g :silent execute \"grep! -R \" . shellescape(expand("<cWORD>")) . \" .\"<cr>:copen 5<cr> 
+nnoremap <silent> <leader>cn :cnext<CR>
+nnoremap <silent> <leader>cp :cprevious<CR>
 " }}}
 
 " Plugin Specification for vimplug --- {{{
