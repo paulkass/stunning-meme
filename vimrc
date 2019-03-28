@@ -20,6 +20,9 @@ let g:rubycomplete_classes_in_global = 1
 let g:rubycomplete_use_bundler = 1
 "}}}
 
+" Pathogen {{{
+execute pathogen#infect() 
+" }}}
 let mapleader = "\\"
 
 " Common Abbreviations {{{
@@ -35,10 +38,10 @@ set shiftwidth=4
 set expandtab
 set number relativenumber
 set nu
-colorscheme delek
 syntax on
+" }}}
 
-" Search Options
+" Search Options {{{
 set incsearch
 set hlsearch
 "}}}
@@ -215,5 +218,36 @@ Plug 'vim-ruby/vim-ruby'
 
 Plug 'vim-syntastic/syntastic'
 
+" Various Colorschemes {{{
+
+" neuromancer
+"Plug 'Zabanaa/neuromancer.vim'
+
+" camouflage
+"Plug 'srushti/my.vim'
+
+" dank-neon
+"Plug 'DankNeon/vim'
+
+" cosmic_latte
+"Plug 'nightsense/cosmic_latte'
+
+" allomancer
+"Plug 'Nequo/vim-allomancer'
+
+" fantasy
+"Plug 'szorfein/fantasy.vim'
+
+" abstract
+Plug 'jdsimcoe/abstract.vim'
+
+" }}}
+
 call plug#end()
 "}}}
+
+" Color Scheme setup {{{
+set termguicolors
+" Preferred color scheme without add-ons is 'delek'
+colorscheme abstract
+" }}}
