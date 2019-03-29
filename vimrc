@@ -174,8 +174,7 @@ augroup code_folding
     "}}}
     
     "Python {{{
-    autocmd FileType python setlocal foldmethod=indent
-    autocmd FileType python setlocal foldlevelstart=0
+    autocmd FileType python setlocal foldlevelstart=1
     "}}}
 augroup END
 "}}}
@@ -216,6 +215,8 @@ Plug 'JamshedVesuna/vim-markdown-preview'
 Plug 'vim-ruby/vim-ruby'
 
 Plug 'vim-syntastic/syntastic'
+
+Plug 'tmhedberg/SimpylFold'
 
 " Various Colorschemes {{{
 
