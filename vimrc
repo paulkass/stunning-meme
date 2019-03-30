@@ -72,6 +72,9 @@ nnoremap <leader>F /\v
 " Mapping to clear highlights from last search
 nnoremap <leader>c :nohlsearch
 
+" Mapping to follow abbreviation without including a space afterwards
+inoremap <buffer> <leader><space> <C-]>
+
 "}}}
 
 " Vim Split Screen Commands {{{
@@ -109,6 +112,7 @@ augroup pythonAbbrevs
     autocmd FileType python     :iabbrev <buffer> iff if:<left>
     autocmd FileType python     :iabbrev <buffer> ret return
     autocmd Filetype python     :inoremap <buffer> <localleader>pr print()<left>
+    autocmd FileType python     :iabbrev <buffer> pr print()<left>
 augroup END
 " }}}
 
