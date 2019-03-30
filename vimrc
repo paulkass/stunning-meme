@@ -254,4 +254,7 @@ call plug#end()
 set termguicolors
 " Preferred color scheme without add-ons is 'delek'
 colorscheme abstract
+
+" For abstract, fix Visual Selection
+hi Visual ctermfg=NONE ctermbg=251 cterm=NONE guifg=NONE guibg=#4E2F31 gui=NONE
 " }}}
