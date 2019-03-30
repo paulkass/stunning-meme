@@ -100,11 +100,6 @@ augroup commentMaps
 augroup END
 " }}}
 
-" Change till quote commands {{{
-nnoremap <localleader>' ct' 
-nnoremap <localleader>" ct"
-"}}}
-
 " Some autocommand conveniences {{{
 " Python {{{
 augroup pythonAbbrevs
