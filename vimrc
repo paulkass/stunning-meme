@@ -217,6 +217,8 @@ Plug 'vim-syntastic/syntastic'
 
 Plug 'tmhedberg/SimpylFold'
 
+Plug 'simnalamburt/vim-mundo'
+
 " Various Colorschemes {{{
 
 " neuromancer
@@ -253,3 +255,9 @@ colorscheme abstract
 " For abstract, fix Visual Selection
 hi Visual ctermfg=NONE ctermbg=251 cterm=NONE guifg=NONE guibg=#4E2F31 gui=NONE
 " }}}
+
+" Mundo Specifications {{{
+set undofile
+set undodir=~/.vim/undo
+nnoremap <leader>mun :MundoToggle<CR>
+"}}}
