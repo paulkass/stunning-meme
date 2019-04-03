@@ -222,12 +222,12 @@ Plug 'vim-syntastic/syntastic'
 
 Plug 'tmhedberg/SimpylFold'
 
+Plug 'shime/vim-livedown'
+
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
 
 Plug 'simnalamburt/vim-mundo'
-
-Plug 'shime/vim-livedown'
 
 " Various Colorschemes {{{
 
@@ -271,3 +271,4 @@ set undofile
 set undodir=~/.vim/undo
 nnoremap <leader>mun :MundoToggle<CR>
 "}}}
+
