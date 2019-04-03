@@ -29,6 +29,7 @@ let mapleader = "\\"
 iabbrev edn end
 iabbrev thigns things
 iabbrev shoulnd should
+iabbrev imporve improve
 "}}}
 
 " Basic Setup {{{
@@ -196,6 +197,10 @@ nnoremap <silent> <leader>cn :cnext<CR>
 nnoremap <silent> <leader>cp :cprevious<CR>
 " }}}
 
+"{{{
+nnoremap gm :LivedownToggle<cr>
+"}}}
+
 " Plugin Specification for vimplug --- {{{
 if empty(glob('~/.vim/autoload/plug.vim'))
     silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
@@ -217,7 +222,12 @@ Plug 'vim-syntastic/syntastic'
 
 Plug 'tmhedberg/SimpylFold'
 
+Plug 'godlygeek/tabular'
+Plug 'plasticboy/vim-markdown'
+
 Plug 'simnalamburt/vim-mundo'
+
+Plug 'shime/vim-livedown'
 
 " Various Colorschemes {{{
 
