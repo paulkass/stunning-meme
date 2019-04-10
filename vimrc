@@ -180,7 +180,7 @@ augroup END
 "}}}
 
 " Statusline Commands {{{
-set statusline=%t " name of file
+set statusline=%f " name of file
 set statusline+=,\ Line:\ %l " line number
 set statusline+=/%-7L " Total lines
 set statusline+=%< " Cutoff mark
