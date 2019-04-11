@@ -98,6 +98,7 @@ augroup commentMaps
     autocmd!
     autocmd FileType python,ruby nnoremap <buffer> <localleader>c I#<esc>
     autocmd FileType vim nnoremap <buffer> <localleader>c I"<esc>
+    autocmd FileType java nnoremap <buffer> <localleader>c I//<esc>
 augroup END
 " }}}
 
@@ -136,6 +137,7 @@ augroup END
 " Java {{{
 augroup javaAbbrevs
     autocmd!
+
     autocmd FileType java :nnoremap <localleader>f :<c-u>execute "normal! mqA;\e`q"<cr>
 augroup END
 " }}}
