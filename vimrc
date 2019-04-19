@@ -108,8 +108,10 @@ augroup pythonAbbrevs
     autocmd!
     autocmd FileType python     :iabbrev <buffer> iff if:<left>
     autocmd FileType python     :iabbrev <buffer> ret return
-    autocmd Filetype python     :inoremap <buffer> <localleader>pr print()<left>
     autocmd FileType python     :iabbrev <buffer> pr print()<left>
+    autocmd FileType python     :iabbrev <buffer> deff def():<left><left><left>
+    autocmd FileType python     :iabbrev <buffer> forr for:<left>
+    autocmd FileType python     :iabbrev <buffer> imp import
 augroup END
 " }}}
 
