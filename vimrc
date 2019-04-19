@@ -39,6 +39,7 @@ set shiftwidth=4
 set expandtab
 set number relativenumber
 set nu
+set backspace=indent,eol,start
 syntax on
 " }}}
 
