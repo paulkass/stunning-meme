@@ -234,6 +234,8 @@ Plug 'plasticboy/vim-markdown'
 
 Plug 'simnalamburt/vim-mundo'
 
+Plug 'junegunn/vader.vim'
+
 " Various Colorschemes {{{
 
 " neuromancer
