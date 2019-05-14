@@ -108,6 +108,7 @@ augroup END
 augroup pythonAbbrevs
     autocmd!
     autocmd FileType python     :iabbrev <buffer> iff if:<left>
+    autocmd FileType python     :iabbrev <buffer> elff elif:<left>
     autocmd FileType python     :iabbrev <buffer> ret return
     autocmd FileType python     :iabbrev <buffer> pr print()<left>
     autocmd FileType python     :iabbrev <buffer> deff def():<left><left><left>
