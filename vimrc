@@ -237,6 +237,10 @@ Plug 'simnalamburt/vim-mundo'
 
 Plug 'junegunn/vader.vim'
 
+Plug 'justinmk/vim-gtfo'
+
+Plug 'tpope/vim-fugitive'
+
 " Various Colorschemes {{{
 
 " neuromancer
