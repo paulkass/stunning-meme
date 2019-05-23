@@ -41,6 +41,7 @@ set number relativenumber
 set nu
 set backspace=indent,eol,start
 syntax on
+set equalalways
 " }}}
 
 " Search Options {{{
@@ -244,22 +245,22 @@ Plug 'tpope/vim-fugitive'
 " Various Colorschemes {{{
 
 " neuromancer
-"Plug 'Zabanaa/neuromancer.vim'
+Plug 'Zabanaa/neuromancer.vim'
 
 " camouflage
-"Plug 'srushti/my.vim'
+Plug 'srushti/my.vim'
 
 " dank-neon
-"Plug 'DankNeon/vim'
+Plug 'DankNeon/vim'
 
 " cosmic_latte
-"Plug 'nightsense/cosmic_latte'
+Plug 'nightsense/cosmic_latte'
 
 " allomancer
-"Plug 'Nequo/vim-allomancer'
+Plug 'Nequo/vim-allomancer'
 
 " fantasy
-"Plug 'szorfein/fantasy.vim'
+Plug 'szorfein/fantasy.vim'
 
 " abstract
 Plug 'jdsimcoe/abstract.vim'
@@ -272,7 +273,7 @@ call plug#end()
 " Color Scheme setup {{{
 set termguicolors
 " Preferred color scheme without add-ons is 'delek'
-colorscheme abstract
+colorscheme abstract 
 
 " For abstract, fix Visual Selection
 hi Visual ctermfg=NONE ctermbg=251 cterm=NONE guifg=NONE guibg=#4E2F31 gui=NONE
