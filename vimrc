@@ -242,6 +242,8 @@ Plug 'justinmk/vim-gtfo'
 
 Plug 'tpope/vim-fugitive'
 
+Plug 'tmsvg/pear-tree'
+
 " Various Colorschemes {{{
 
 " neuromancer
@@ -284,4 +286,11 @@ set undofile
 set undodir=~/.vim/undo
 nnoremap <leader>mun :MundoToggle<CR>
 "}}}
+
+" Pear Tree Configuration {{{
+let g:pear_tree_smart_openers = 1
+let g:pear_tree_smart_closers = 1
+let g:pear_tree_smart_backspace = 1
+" }}}  
+
 
