@@ -39,7 +39,6 @@ set shiftwidth=4
 set expandtab
 set number relativenumber
 set nu
-set backspace=indent,eol,start
 syntax on
 set equalalways
 " }}}
@@ -100,7 +99,6 @@ augroup commentMaps
     autocmd!
     autocmd FileType python,ruby nnoremap <buffer> <localleader>c I#<esc>
     autocmd FileType vim nnoremap <buffer> <localleader>c I"<esc>
-    autocmd FileType java nnoremap <buffer> <localleader>c I//<esc>
 augroup END
 " }}}
 
@@ -109,12 +107,9 @@ augroup END
 augroup pythonAbbrevs
     autocmd!
     autocmd FileType python     :iabbrev <buffer> iff if:<left>
-    autocmd FileType python     :iabbrev <buffer> elff elif:<left>
     autocmd FileType python     :iabbrev <buffer> ret return
+    autocmd Filetype python     :inoremap <buffer> <localleader>pr print()<left>
     autocmd FileType python     :iabbrev <buffer> pr print()<left>
-    autocmd FileType python     :iabbrev <buffer> deff def():<left><left><left>
-    autocmd FileType python     :iabbrev <buffer> forr for:<left>
-    autocmd FileType python     :iabbrev <buffer> imp import
 augroup END
 " }}}
 
@@ -142,7 +137,6 @@ augroup END
 " Java {{{
 augroup javaAbbrevs
     autocmd!
-
     autocmd FileType java :nnoremap <localleader>f :<c-u>execute "normal! mqA;\e`q"<cr>
 augroup END
 " }}}
@@ -244,6 +238,8 @@ Plug 'tpope/vim-fugitive'
 
 Plug 'tmsvg/pear-tree'
 
+Plug 'vim-airline/vim-airline'
+
 " Various Colorschemes {{{
 
 " neuromancer
@@ -267,6 +263,9 @@ Plug 'szorfein/fantasy.vim'
 " abstract
 Plug 'jdsimcoe/abstract.vim'
 
+" spring-night
+Plug 'rhysd/vim-color-spring-night'
+
 " }}}
 
 call plug#end()
@@ -275,7 +274,7 @@ call plug#end()
 " Color Scheme setup {{{
 set termguicolors
 " Preferred color scheme without add-ons is 'delek'
-colorscheme abstract 
+colorscheme spring-night
 
 " For abstract, fix Visual Selection
 hi Visual ctermfg=NONE ctermbg=251 cterm=NONE guifg=NONE guibg=#4E2F31 gui=NONE
