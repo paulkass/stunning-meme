@@ -215,8 +215,6 @@ call plug#begin("~/.vim/plugged")
 
 Plug 'tpope/vim-surround'
 
-Plug 'JamshedVesuna/vim-markdown-preview'
-
 Plug 'vim-ruby/vim-ruby'
 
 Plug 'vim-syntastic/syntastic'
@@ -226,17 +224,12 @@ Plug 'tmhedberg/SimpylFold'
 Plug 'shime/vim-livedown'
 
 Plug 'godlygeek/tabular'
-Plug 'plasticboy/vim-markdown'
 
 Plug 'simnalamburt/vim-mundo'
 
 Plug 'junegunn/vader.vim'
 
-Plug 'justinmk/vim-gtfo'
-
 Plug 'tpope/vim-fugitive'
-
-Plug 'tmsvg/pear-tree'
 
 Plug 'vim-airline/vim-airline'
 
@@ -285,11 +278,4 @@ set undofile
 set undodir=~/.vim/undo
 nnoremap <leader>mun :MundoToggle<CR>
 "}}}
-
-" Pear Tree Configuration {{{
-let g:pear_tree_smart_openers = 1
-let g:pear_tree_smart_closers = 1
-let g:pear_tree_smart_backspace = 1
-" }}}  
-
 
