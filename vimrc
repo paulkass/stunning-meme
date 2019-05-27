@@ -233,6 +233,9 @@ Plug 'tpope/vim-fugitive'
 
 Plug 'vim-airline/vim-airline'
 
+Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
+" Run `:CocInstall coc-python` the first time through
+
 " Various Colorschemes {{{
 
 " neuromancer
