@@ -296,6 +296,10 @@ inoremap <silent><expr> <TAB>
       \ coc#refresh()
 
 
+nmap <leader>a <Plug>(coc-codeaction-selected)
+nmap <leader>rn <Plug>(coc-rename)
+
+
 inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
 
