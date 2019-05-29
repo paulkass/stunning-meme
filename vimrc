@@ -23,7 +23,7 @@ let g:rubycomplete_use_bundler = 1
 " Pathogen {{{
 execute pathogen#infect() 
 " }}}
-let mapleader = "\\"
+let mapleader = " "
 
 " Common Abbreviations {{{
 iabbrev edn end
@@ -106,6 +106,7 @@ augroup END
 " Python {{{
 augroup pythonAbbrevs
     autocmd!
+    autocmd FileType python     :let maplocalleader = " "
     autocmd FileType python     :iabbrev <buffer> iff if:<left>
     autocmd FileType python     :iabbrev <buffer> ret return
     autocmd Filetype python     :inoremap <buffer> <localleader>pr print()<left>
@@ -217,7 +218,7 @@ Plug 'tpope/vim-surround'
 
 Plug 'vim-ruby/vim-ruby'
 
-Plug 'vim-syntastic/syntastic'
+"Plug 'vim-syntastic/syntastic'
 
 Plug 'tmhedberg/SimpylFold'
 
@@ -281,4 +282,24 @@ set undofile
 set undodir=~/.vim/undo
 nnoremap <leader>mun :MundoToggle<CR>
 "}}}
+
+" Coc.vim custom commands {{{
+
+" use <tab> for trigger completion and navigate to the next complete item
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~ '\s'
+endfunction
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+
+
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+
+let g:airline_section_error = '%{airline#util#wrap(airline#extensions#coc#get_error(),0)}'
+let g:airline_section_warning = '%{airline#util#wrap(airline#extensions#coc#get_warning(),0)}' 
+" }}}
 
