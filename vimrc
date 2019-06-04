@@ -23,7 +23,7 @@ let g:rubycomplete_use_bundler = 1
 " Pathogen {{{
 execute pathogen#infect() 
 " }}}
-let mapleader = " "
+let mapleader = "\\"
 
 " Common Abbreviations {{{
 iabbrev edn end
@@ -38,7 +38,7 @@ set tabstop=4
 set shiftwidth=4
 set expandtab
 set number relativenumber
-set nu
+ set nu
 syntax on
 set equalalways
 " }}}
@@ -106,7 +106,6 @@ augroup END
 " Python {{{
 augroup pythonAbbrevs
     autocmd!
-    autocmd FileType python     :let maplocalleader = " "
     autocmd FileType python     :iabbrev <buffer> iff if:<left>
     autocmd FileType python     :iabbrev <buffer> ret return
     autocmd Filetype python     :inoremap <buffer> <localleader>pr print()<left>
@@ -234,7 +233,7 @@ Plug 'tpope/vim-fugitive'
 
 Plug 'vim-airline/vim-airline'
 
-Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
+" Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
 " Run `:CocInstall coc-python` the first time through
 
 " Various Colorschemes {{{
@@ -298,6 +297,10 @@ inoremap <silent><expr> <TAB>
 
 nmap <leader>a <Plug>(coc-codeaction-selected)
 nmap <leader>rn <Plug>(coc-rename)
+
+nmap <leader>ca <Plug>(coc-diagnostic-info)
+nmap <silent> [c <Plug>(coc-diagnostic-prev)
+nmap <silent> ]c <Plug>(coc-diagnostic-next)
 
 
 inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
