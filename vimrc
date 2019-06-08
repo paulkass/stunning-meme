@@ -5,6 +5,7 @@ augroup initialRubyCompilerGroup
 augroup END
 
 set nocompatible
+set encoding=utf-8
 filetype on
 filetype indent on
 filetype plugin on
@@ -19,6 +20,12 @@ let g:rubycomplete_buffer_loading = 1
 let g:rubycomplete_classes_in_global = 1
 let g:rubycomplete_use_bundler = 1
 "}}}
+
+let g:pymode = 0
+let g:pymode_python = 'python3'
+let g:pymode_paths = []
+let g:pymode_rope = 1
+let g:pymode_rope_rename_bind = '<C-c>rr'
 
 " Pathogen {{{
 execute pathogen#infect() 
@@ -110,6 +117,21 @@ augroup pythonAbbrevs
     autocmd FileType python     :iabbrev <buffer> ret return
     autocmd Filetype python     :inoremap <buffer> <localleader>pr print()<left>
     autocmd FileType python     :iabbrev <buffer> pr print()<left>
+augroup END
+
+
+function <SID>CreatePyDocString()
+    " Source of template: https://docs.python-guide.org/writing/documentation/ 
+    " We are implying this to be called in normal mode
+    let line = line(".")
+    execute "normal!" "o\"\"\"\<cr>Summary line.\<cr>\<cr>Extended description of function.\<cr>\<cr>Parameters\<cr>----------\<cr>arg : type\<cr>\tDescription of arg\<cr>\<cr>\<BS>Returns\<cr>-------\<cr>type\<cr>\tDescription of return value\<cr>\<cr>\<BS>\"\"\"\<cr>\<esc>"
+    execute line+2
+endfunction
+
+augroup pydocGen
+    autocmd!
+    autocmd FileType python     :inoremap <buffer> <localleader>doc <Esc>:call <SID>CreatePyDocString()<Cr>
+    autocmd FileType python     :nnoremap <buffer> <localleader>doc :call <SID>CreatePyDocString()<Cr>
 augroup END
 " }}}
 
@@ -217,7 +239,7 @@ Plug 'tpope/vim-surround'
 
 Plug 'vim-ruby/vim-ruby'
 
-"Plug 'vim-syntastic/syntastic'
+Plug 'vim-syntastic/syntastic'
 
 Plug 'tmhedberg/SimpylFold'
 
@@ -233,8 +255,9 @@ Plug 'tpope/vim-fugitive'
 
 Plug 'vim-airline/vim-airline'
 
-" Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
-" Run `:CocInstall coc-python` the first time through
+Plug 'Valloric/YouCompleteMe'
+
+Plug 'python-mode/python-mode', { 'for': 'python', 'branch': 'develop' }
 
 " Various Colorschemes {{{
 
@@ -282,31 +305,9 @@ set undodir=~/.vim/undo
 nnoremap <leader>mun :MundoToggle<CR>
 "}}}
 
-" Coc.vim custom commands {{{
+" Syntastic Setup {{{
 
-" use <tab> for trigger completion and navigate to the next complete item
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~ '\s'
-endfunction
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
+" let g:syntastic_python_pylint_args = "--function-naming-style='PascalCase' --variable-naming-style='any' --method-naming-style='camelCase' --argument-naming-style='camelCase' --attr-naming-style='camelCase'"
 
-
-nmap <leader>a <Plug>(coc-codeaction-selected)
-nmap <leader>rn <Plug>(coc-rename)
-
-nmap <leader>ca <Plug>(coc-diagnostic-info)
-nmap <silent> [c <Plug>(coc-diagnostic-prev)
-nmap <silent> ]c <Plug>(coc-diagnostic-next)
-
-
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
-
-let g:airline_section_error = '%{airline#util#wrap(airline#extensions#coc#get_error(),0)}'
-let g:airline_section_warning = '%{airline#util#wrap(airline#extensions#coc#get_warning(),0)}' 
 " }}}
 
