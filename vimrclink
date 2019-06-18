@@ -1,7 +1,8 @@
 #!/bin/sh
-if [ "$1" == "-f" ]
+
+if [ "$1" = "-f" ]
 then
-    ln -f ~/.vimrc vimrc
+    ln -f vimrc ~/.vimrc 
 else
-    ln ~/.vimrc vimrc
+    ln vimrc ~/.vimrc
 fi
