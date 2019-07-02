@@ -45,7 +45,7 @@ set tabstop=4
 set shiftwidth=4
 set expandtab
 set number relativenumber
- set nu
+set nu
 syntax on
 set equalalways
 " }}}
@@ -79,10 +79,13 @@ nnoremap <leader>W :match none<cr>
 nnoremap <leader>F /\v
 
 " Mapping to clear highlights from last search
-nnoremap <leader>c :nohlsearch
+nnoremap <leader>C :nohlsearch<cr>
 
 " Mapping to follow abbreviation without including a space afterwards
 inoremap <buffer> <leader><space> <C-]>
+
+" Mapping that deletes the line bu leaves you in insert mode at the beginning 
+nnoremap <leader>D ^c$
 
 "}}}
 
@@ -130,8 +133,8 @@ endfunction
 
 augroup pydocGen
     autocmd!
-    autocmd FileType python     :inoremap <buffer> <localleader>doc <Esc>:call <SID>CreatePyDocString()<Cr>
-    autocmd FileType python     :nnoremap <buffer> <localleader>doc :call <SID>CreatePyDocString()<Cr>
+    "autocmd FileType python     :inoremap <buffer> <localleader>doc <Esc>:call <SID>CreatePyDocString()<Cr>
+    "autocmd FileType python     :nnoremap <buffer> <localleader>doc :call <SID>CreatePyDocString()<Cr>
 augroup END
 " }}}
 
@@ -231,13 +234,16 @@ if empty(glob('~/.vim/autoload/plug.vim'))
     autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-let vim_markdown_preview_github=1
+" Some Markdown Commands --- {{{
+"let vim_markdown_preview_github=1
+let g:livedown_open = 1
+let g:livedown_port = 1337
+let g:livedown_browser = "firefox"
+" }}}
 
 call plug#begin("~/.vim/plugged")
 
 Plug 'tpope/vim-surround'
-
-Plug 'vim-ruby/vim-ruby'
 
 Plug 'vim-syntastic/syntastic'
 
@@ -251,13 +257,17 @@ Plug 'simnalamburt/vim-mundo'
 
 Plug 'junegunn/vader.vim'
 
-Plug 'tpope/vim-fugitive'
-
 Plug 'vim-airline/vim-airline'
 
 Plug 'Valloric/YouCompleteMe'
 
 Plug 'python-mode/python-mode', { 'for': 'python', 'branch': 'develop' }
+
+Plug 'jlanzarotta/bufexplorer'
+
+Plug 'junegunn/vader.vim'
+
+Plug 'kkoomen/vim-doge'
 
 " Various Colorschemes {{{
 
@@ -294,7 +304,7 @@ call plug#end()
 set termguicolors
 " Preferred color scheme without add-ons is 'delek'
 colorscheme spring-night
-
+"
 " For abstract, fix Visual Selection
 hi Visual ctermfg=NONE ctermbg=251 cterm=NONE guifg=NONE guibg=#4E2F31 gui=NONE
 " }}}
@@ -309,5 +319,10 @@ nnoremap <leader>mun :MundoToggle<CR>
 
 " let g:syntastic_python_pylint_args = "--function-naming-style='PascalCase' --variable-naming-style='any' --method-naming-style='camelCase' --argument-naming-style='camelCase' --attr-naming-style='camelCase'"
 
+" }}}
+
+" Doge Setup {{{
+let g:doge_mapping = "<leader>doc"
+let g:doge_doc_standard_python = 'numpy'
 " }}}
 
