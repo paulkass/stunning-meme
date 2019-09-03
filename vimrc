@@ -118,7 +118,7 @@ augroup pythonAbbrevs
     autocmd!
     autocmd FileType python     :iabbrev <buffer> iff if:<left>
     autocmd FileType python     :iabbrev <buffer> ret return
-    autocmd Filetype python     :inoremap <buffer> <localleader>pr print()<left>
+    autocmd FileType python     :inoremap <buffer> <localleader>pr print()<left>
     autocmd FileType python     :iabbrev <buffer> pr print()<left>
 augroup END
 
@@ -171,6 +171,15 @@ augroup vimAbbrevs
     autocmd!
 augroup END
 " }}}
+
+" Rust {{{
+augroup rustAbbrevs
+    autocmd!
+    autocmd FileType rust :nnoremap <localleader>e :<c-u>execute "normal! $a;"<cr>
+    autocmd FileType rust :inoremap <buffer> <localleader>pr println!("");<left><left><left>
+augroup END
+" }}}
+
 " autocommand convenience end }}}
 
 " Operator Mappings {{{
