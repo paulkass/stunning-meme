@@ -40,6 +40,7 @@ iabbrev imporve improve
 "}}}
 
 " Basic Setup {{{
+set backspace=indent,eol,start
 inoremap jk <Esc>
 set tabstop=4
 set shiftwidth=4
