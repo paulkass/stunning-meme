@@ -40,7 +40,6 @@ iabbrev imporve improve
 "}}}
 
 " Basic Setup {{{
-set backspace=indent,eol,start
 inoremap jk <Esc>
 set tabstop=4
 set shiftwidth=4
@@ -177,7 +176,8 @@ augroup END
 augroup rustAbbrevs
     autocmd!
     autocmd FileType rust :nnoremap <localleader>e :<c-u>execute "normal! $a;"<cr>
-    autocmd FileType rust :inoremap <buffer> <localleader>pr println!("");<left><left><left>
+    autocmd FileType rust :iabbrev <buffer> pr println!("");<left><left><left>
+    autocmd FileType rust :iabbrev <buffer> ll let<space>=<left><left>
 augroup END
 " }}}
 
