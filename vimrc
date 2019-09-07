@@ -173,11 +173,19 @@ augroup END
 " }}}
 
 " Rust {{{
+function <SID>AddClosingBrace(line) 
+   if v:char == '{' && match(getline(a:line), '\v^.*\a+\s+$') != -1
+       let v:char = "{\n\n}"
+   endif
+endfunction
+
 augroup rustAbbrevs
     autocmd!
     autocmd FileType rust :nnoremap <localleader>e :<c-u>execute "normal! $a;"<cr>
     autocmd FileType rust :iabbrev <buffer> pr println!("");<left><left><left>
     autocmd FileType rust :iabbrev <buffer> ll let<space>=<left><left>
+    "autocmd InsertCharPre *.rs :call <SID>AddClosingBrace(line("."))
+    autocmd FileType rust :iabbrev <localleader>a ->
 augroup END
 " }}}
 
