@@ -109,6 +109,7 @@ augroup commentMaps
     autocmd!
     autocmd FileType python,ruby nnoremap <buffer> <localleader>c I#<esc>
     autocmd FileType vim nnoremap <buffer> <localleader>c I"<esc>
+    autocmd FileType rust nnoremap <buffer> <localleader>c I//<esc>
 augroup END
 " }}}
 
@@ -186,6 +187,7 @@ augroup rustAbbrevs
     autocmd FileType rust :iabbrev <buffer> ll let<space>=<left><left>
     "autocmd InsertCharPre *.rs :call <SID>AddClosingBrace(line("."))
     autocmd FileType rust :iabbrev <localleader>a ->
+    autocmd FileType rust :iabbrev <localleader>m =>,<left>
 augroup END
 " }}}
 
@@ -344,3 +346,7 @@ let g:doge_mapping = "<leader>doc"
 let g:doge_doc_standard_python = 'numpy'
 " }}}
 
+" {{{ YouCompleteMe Setup
+noremap <silent> <localleader>def :YcmCompleter GoToDefinition<cr>
+noremap <silent> <localleader>dec :YcmCompleter GoToDeclaration<cr> 
+" }}}
