@@ -79,7 +79,7 @@ nnoremap <leader>W :match none<cr>
 nnoremap <leader>F /\v
 
 " Mapping to clear highlights from last search
-nnoremap <leader>C :nohlsearch<cr>
+nnoremap <silent> <leader>C :nohlsearch<cr>
 
 " Mapping to follow abbreviation without including a space afterwards
 inoremap <buffer> <leader><space> <C-]>
