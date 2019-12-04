@@ -289,6 +289,8 @@ Plug 'junegunn/vader.vim'
 
 Plug 'kkoomen/vim-doge'
 
+Plug 'rust-lang/rust.vim'
+
 " Various Colorschemes {{{
 
 " neuromancer
@@ -351,4 +353,8 @@ let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.34.2-src/src'
 
 noremap <silent> <localleader>def :YcmCompleter GoToDefinition<cr>
 noremap <silent> <localleader>dec :YcmCompleter GoToDeclaration<cr> 
+noremap <silent> <localleader>impl :YcmCompleter GoToImplementation<cr>
+noremap <silent> <localleader>ref :YcmCompleter GoToReferences<cr>
+noremap <silent> <localleader>type :YcmCompleter GetType<cr>
+noremap <silent> <localleader>ydoc :YcmCompleter GetDoc<cr>
 " }}}
