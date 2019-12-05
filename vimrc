@@ -357,4 +357,5 @@ noremap <silent> <localleader>impl :YcmCompleter GoToImplementation<cr>
 noremap <silent> <localleader>ref :YcmCompleter GoToReferences<cr>
 noremap <silent> <localleader>type :YcmCompleter GetType<cr>
 noremap <silent> <localleader>ydoc :YcmCompleter GetDoc<cr>
+noremap <silent> <localleader>fix :YcmCompleter FixIt<cr>
 " }}}
