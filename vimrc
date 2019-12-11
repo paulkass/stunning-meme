@@ -349,7 +349,7 @@ let g:doge_doc_standard_python = 'numpy'
 " }}}
 
 " {{{ YouCompleteMe Setup
-let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.34.2-src/src'
+let g:ycm_rust_src_path = '/Users/pkassianik/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src'
 
 noremap <silent> <localleader>def :YcmCompleter GoToDefinition<cr>
 noremap <silent> <localleader>dec :YcmCompleter GoToDeclaration<cr> 
