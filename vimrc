@@ -265,13 +265,13 @@ call plug#begin("~/.vim/plugged")
 
 Plug 'tpope/vim-surround'
 
-Plug 'vim-syntastic/syntastic'
+" Plug 'vim-syntastic/syntastic'
 
 Plug 'tmhedberg/SimpylFold'
 
-Plug 'shime/vim-livedown'
+" Plug 'shime/vim-livedown'
 
-Plug 'godlygeek/tabular'
+" Plug 'godlygeek/tabular'
 
 Plug 'simnalamburt/vim-mundo'
 
@@ -281,13 +281,13 @@ Plug 'vim-airline/vim-airline'
 
 Plug 'Valloric/YouCompleteMe'
 
-Plug 'python-mode/python-mode', { 'for': 'python', 'branch': 'develop' }
+" Plug 'python-mode/python-mode', { 'for': 'python', 'branch': 'develop' }
 
 Plug 'jlanzarotta/bufexplorer'
 
 Plug 'junegunn/vader.vim'
 
-Plug 'kkoomen/vim-doge'
+" Plug 'kkoomen/vim-doge'
 
 Plug 'rust-lang/rust.vim'
 
