@@ -48,6 +48,7 @@ set number relativenumber
 set nu
 syntax on
 set equalalways
+set backspace=indent,eol,start
 " }}}
 
 " Search Options {{{
@@ -76,7 +77,7 @@ nnoremap <leader>W :match none<cr>
 " }}}
 
 " Mapping to do search with very magic regex
-nnoremap <leader>F /\v
+noremap <leader>F /\v
 
 " Mapping to clear highlights from last search
 nnoremap <silent> <leader>C :nohlsearch<cr>
@@ -243,10 +244,6 @@ nnoremap <silent> <leader>cn :cnext<CR>
 nnoremap <silent> <leader>cp :cprevious<CR>
 " }}}
 
-"{{{
-nnoremap gm :LivedownToggle<cr>
-"}}}
-
 " Plugin Specification for vimplug --- {{{
 if empty(glob('~/.vim/autoload/plug.vim'))
     silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
@@ -259,6 +256,7 @@ endif
 let g:livedown_open = 1
 let g:livedown_port = 1337
 let g:livedown_browser = "firefox"
+nnoremap gm :LivedownToggle<cr>
 " }}}
 
 call plug#begin("~/.vim/plugged")
@@ -290,6 +288,8 @@ Plug 'junegunn/vader.vim'
 " Plug 'kkoomen/vim-doge'
 
 Plug 'rust-lang/rust.vim'
+
+Plug 'preservim/nerdtree'
 
 " Various Colorschemes {{{
 
@@ -358,4 +358,9 @@ noremap <silent> <localleader>ref :YcmCompleter GoToReferences<cr>
 noremap <silent> <localleader>type :YcmCompleter GetType<cr>
 noremap <silent> <localleader>ydoc :YcmCompleter GetDoc<cr>
 noremap <silent> <localleader>fix :YcmCompleter FixIt<cr>
+" }}}
+
+" NERDTree Bindings - {{{
+nnoremap <leader>nto :NERDTreeToggle<CR>
+nnoremap <leader>ntf :NERDTreeFocus<CR>
 " }}}
