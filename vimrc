@@ -48,6 +48,7 @@ set number relativenumber
 set nu
 syntax on
 set equalalways
+set backspace=indent,eol,start
 " }}}
 
 " Search Options {{{
@@ -76,7 +77,7 @@ nnoremap <leader>W :match none<cr>
 " }}}
 
 " Mapping to do search with very magic regex
-nnoremap <leader>F /\v
+noremap <leader>F /\v
 
 " Mapping to clear highlights from last search
 nnoremap <silent> <leader>C :nohlsearch<cr>
@@ -238,14 +239,16 @@ set statusline+=%y
 "}}}
 
 " Grep Search commands {{{
-"nnoremap <leader>g :silent execute \"grep! -R \" . shellescape(expand("<cWORD>")) . \" .\"<cr>:copen 5<cr> 
 nnoremap <silent> <leader>cn :cnext<CR>
 nnoremap <silent> <leader>cp :cprevious<CR>
-" }}}
 
-"{{{
-nnoremap gm :LivedownToggle<cr>
-"}}}
+function <SID>VimGrepSearch(query)
+    execute 'vimgrep /\v' . a:query . '/g **/*'
+    copen
+endfunction
+
+command! -nargs=* Vsearch :call <SID>VimGrepSearch(<q-args>) 
+" }}}
 
 " Plugin Specification for vimplug --- {{{
 if empty(glob('~/.vim/autoload/plug.vim'))
@@ -259,6 +262,7 @@ endif
 let g:livedown_open = 1
 let g:livedown_port = 1337
 let g:livedown_browser = "firefox"
+nnoremap gm :LivedownToggle<cr>
 " }}}
 
 call plug#begin("~/.vim/plugged")
@@ -269,9 +273,9 @@ Plug 'vim-syntastic/syntastic'
 
 Plug 'tmhedberg/SimpylFold'
 
-Plug 'shime/vim-livedown'
+" Plug 'shime/vim-livedown'
 
-Plug 'godlygeek/tabular'
+" Plug 'godlygeek/tabular'
 
 Plug 'simnalamburt/vim-mundo'
 
@@ -281,15 +285,17 @@ Plug 'vim-airline/vim-airline'
 
 Plug 'Valloric/YouCompleteMe'
 
-Plug 'python-mode/python-mode', { 'for': 'python', 'branch': 'develop' }
+" Plug 'python-mode/python-mode', { 'for': 'python', 'branch': 'develop' }
 
 Plug 'jlanzarotta/bufexplorer'
 
 Plug 'junegunn/vader.vim'
 
-Plug 'kkoomen/vim-doge'
+" Plug 'kkoomen/vim-doge'
 
 Plug 'rust-lang/rust.vim'
+
+Plug 'preservim/nerdtree'
 
 " Various Colorschemes {{{
 
@@ -357,4 +363,15 @@ noremap <silent> <localleader>impl :YcmCompleter GoToImplementation<cr>
 noremap <silent> <localleader>ref :YcmCompleter GoToReferences<cr>
 noremap <silent> <localleader>type :YcmCompleter GetType<cr>
 noremap <silent> <localleader>ydoc :YcmCompleter GetDoc<cr>
+noremap <silent> <localleader>fix :YcmCompleter FixIt<cr>
+" }}}
+
+" Rust.vim Settings - {{{
+let g:rustc_path = '/home/paul/.cargo/bin/rustc'
+" }}}
+
+" NERDTree Bindings - {{{
+nnoremap <leader>nto :NERDTreeToggle<CR>
+nnoremap <leader>ntf :NERDTreeFocus<CR>
+nnoremap <leader>ntm :NERDTreeMirror<CR>
 " }}}
