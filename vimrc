@@ -239,9 +239,15 @@ set statusline+=%y
 "}}}
 
 " Grep Search commands {{{
-"nnoremap <leader>g :silent execute \"grep! -R \" . shellescape(expand("<cWORD>")) . \" .\"<cr>:copen 5<cr> 
 nnoremap <silent> <leader>cn :cnext<CR>
 nnoremap <silent> <leader>cp :cprevious<CR>
+
+function <SID>VimGrepSearch(query)
+    execute 'vimgrep /\v' . a:query . '/g **/*'
+    copen
+endfunction
+
+command! -nargs=* Vsearch :call <SID>VimGrepSearch(<q-args>) 
 " }}}
 
 " Plugin Specification for vimplug --- {{{
@@ -263,7 +269,7 @@ call plug#begin("~/.vim/plugged")
 
 Plug 'tpope/vim-surround'
 
-" Plug 'vim-syntastic/syntastic'
+Plug 'vim-syntastic/syntastic'
 
 Plug 'tmhedberg/SimpylFold'
 
@@ -349,7 +355,10 @@ let g:doge_doc_standard_python = 'numpy'
 " }}}
 
 " {{{ YouCompleteMe Setup
-let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.34.2-src/src'
+" Rust for Macs
+" let g:ycm_rust_src_path = '/usr/local/rust/rustc-1.34.2-src/src'
+" Rust on Linux w/ Rustup
+let g:ycm_rust_src_path = '/home/paul/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src'
 
 noremap <silent> <localleader>def :YcmCompleter GoToDefinition<cr>
 noremap <silent> <localleader>dec :YcmCompleter GoToDeclaration<cr> 
@@ -360,7 +369,12 @@ noremap <silent> <localleader>ydoc :YcmCompleter GetDoc<cr>
 noremap <silent> <localleader>fix :YcmCompleter FixIt<cr>
 " }}}
 
+" Rust.vim Settings - {{{
+let g:rustc_path = '/home/paul/.cargo/bin/rustc'
+" }}}
+
 " NERDTree Bindings - {{{
 nnoremap <leader>nto :NERDTreeToggle<CR>
 nnoremap <leader>ntf :NERDTreeFocus<CR>
+nnoremap <leader>ntm :NERDTreeMirror<CR>
 " }}}
