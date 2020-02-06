@@ -297,6 +297,8 @@ Plug 'rust-lang/rust.vim'
 
 Plug 'preservim/nerdtree'
 
+Plug 'hashivim/vim-terraform'
+
 " Various Colorschemes {{{
 
 " neuromancer
