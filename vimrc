@@ -192,6 +192,16 @@ augroup rustAbbrevs
 augroup END
 " }}}
 
+" Terraform {{{
+augroup tfAbbrevs 
+    autocmd!
+    autocmd FileType terraform :nnoremap <localleader>sp /\vresource\s*\"aws_sqs_queue\"\s*\"
+    autocmd FileType terraform :nnoremap <localleader>sl /\vresource\s*\"aws_lambda_function\"\s*\"
+    autocmd FileType terraform :nnoremap <localleader>sn /\vresource\s*\"\w*\"\s*\"
+    autocmd FileType terraform :nnoremap <localleader>st /\vresource\s*\"
+augroup END
+" }}}
+
 " autocommand convenience end }}}
 
 " Operator Mappings {{{
