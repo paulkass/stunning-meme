@@ -189,6 +189,9 @@ augroup rustAbbrevs
     "autocmd InsertCharPre *.rs :call <SID>AddClosingBrace(line("."))
     autocmd FileType rust :iabbrev <localleader>a ->
     autocmd FileType rust :iabbrev <localleader>m =>,<left>
+    autocmd FileType rust :set foldmarker={,}
+    " Set the marker to {,} so you can switch to marker fold type if needed
+    autocmd FileType rust :set foldmethod=syntax
 augroup END
 " }}}
 
@@ -376,6 +379,7 @@ noremap <silent> <localleader>ref :YcmCompleter GoToReferences<cr>
 noremap <silent> <localleader>type :YcmCompleter GetType<cr>
 noremap <silent> <localleader>ydoc :YcmCompleter GetDoc<cr>
 noremap <silent> <localleader>fix :YcmCompleter FixIt<cr>
+nnoremap <silent> <localleader>rn :YcmCompleter RefactorRename
 " }}}
 
 " Rust.vim Settings - {{{
