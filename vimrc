@@ -370,7 +370,8 @@ let g:doge_doc_standard_python = 'numpy'
 " }}}
 
 " {{{ YouCompleteMe Setup
-let g:ycm_rust_src_path = '/Users/pkassianik/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src'
+let g:ycm_rust_src_path = '~/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src'
+let g:ycm_global_ycm_extra_conf = '~/stunning_meme/ycm_extra_conf.py'
 
 noremap <silent> <localleader>def :YcmCompleter GoToDefinition<cr>
 noremap <silent> <localleader>dec :YcmCompleter GoToDeclaration<cr> 
