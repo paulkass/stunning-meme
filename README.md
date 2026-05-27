@@ -16,6 +16,8 @@ so no plugin code is vendored here.
   config into `backups/` and commit it.
 - `backups/` — committed backups of config a `sync` displaced on first install
   (`backups/<app>/<timestamp>/`); see `backups/README.md`.
+- `.githooks/` — this repo's git hooks (not an app); `make hooks` activates them.
+  See "Git hooks".
 - `neovim/` — Neovim config.
   - `init.lua` — entry point: sets the leader, loads the `lua/config` modules,
     bootstraps lazy.nvim, and auto-imports plugin specs.
@@ -52,6 +54,26 @@ Then launch `nvim` — lazy.nvim bootstraps and installs the plugins on first st
 `make claude-code` symlinks `settings.json`, `skills/`, and `hooks/` into
 `~/.claude`, backing up any pre-existing real versions per-item into
 `backups/claude-code/<timestamp>/` (committed) first.
+
+## Git hooks
+
+This repo ships two git hooks in the tracked `.githooks/` dir. Activate them once
+per clone — this is separate from `make` and only touches *this repo's* git config
+(`core.hooksPath`, covering all worktrees):
+
+```sh
+make hooks        # sets core.hooksPath -> .githooks
+```
+
+- **`pre-merge-commit`** — on `master`, blocks a merge commit while the working
+  tree has uncommitted (unstaged) changes, so stray edits aren't folded into the
+  merge. (Real merges with *staged* changes and fast-forward merges are already
+  handled by git, so they're not gated here.) Bypass with `git merge --no-verify`.
+- **`post-merge`** — on `master`, re-syncs every app (`make`) after a merge/pull,
+  skipping when only `backups/` changed. Any config it displaces is backed up and
+  committed automatically.
+
+Both no-op on non-`master` branches, so feature-branch worktrees are unaffected.
 
 ## Adding a new app
 

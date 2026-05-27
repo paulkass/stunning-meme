@@ -10,7 +10,7 @@ Each app folder carries a self-contained `sync` script (`./sync` installs the sy
 
 ## Files
 
-- `Makefile` — top-level interface. Auto-discovers each app's `sync` script and exposes `make` (sync all), `make verify` (verify all), `make <app>` (sync one), `make <app>.verify` (verify one).
+- `Makefile` — top-level interface. Auto-discovers each app's `sync` script and exposes `make` (sync all), `make verify` (verify all), `make <app>` (sync one), `make <app>.verify` (verify one). Also carries a standalone `make hooks` target that activates the repo's git hooks (see "Git hooks"); it is **not** a prerequisite of `make`.
 - `neovim/init.lua` — the Neovim entry point: sets the leader, requires the config modules, bootstraps lazy.nvim, and auto-imports plugin specs (`import = "plugins"`).
 - `neovim/lua/config/options.lua` — editor settings (the `vim.opt.*` lines). `termguicolors` is set here, before the colorscheme loads.
 - `neovim/lua/config/keymaps.lua` — every mapping, each defined with `vim.keymap.set` and a `desc`. The `desc` is the single source of truth for discovery — see "Discovering keybindings" below. Do not hand-maintain a separate cheatsheet.
@@ -18,6 +18,7 @@ Each app folder carries a self-contained `sync` script (`./sync` installs the sy
 - `neovim/lazy-lock.json` — lazy.nvim's pinned plugin versions. Commit it whenever it changes.
 - `lib/backup.sh` — shared helper sourced by every app's `sync`. Its `repo_backup SRC APP PATH...` moves each displaced path into `backups/<app>/<timestamp>/` (basename kept) and commits just that backup, so backups are version-controlled in one place instead of piling up untracked next to the live config. A failed commit is non-fatal (files are saved either way). `lib/` has no `sync`, so the `Makefile` glob ignores it.
 - `backups/` — committed archives of pre-existing config that a `sync` displaced on first install, one `backups/<app>/<timestamp>/` subdir per run (see `backups/README.md`). Written by `lib/backup.sh`; safe to prune once an old config is no longer needed.
+- `.githooks/` — tracked, hidden dir holding this repo's git hooks (`pre-merge-commit`, `post-merge`). **Not an app** — it has no `sync`, so the `Makefile`'s `*/sync` glob ignores it (like `lib/`). Activated by `make hooks`, which sets a repo-local `core.hooksPath`. See "Git hooks" for what each hook does.
 - `neovim/sync` — install script (relocated from the old root `nvimlink`); symlinks `init.lua`, the `lua/` directory, and `lazy-lock.json` into `~/.config/nvim`. A pre-existing real config is backed up wholesale into `backups/neovim/<timestamp>/` and committed (via `repo_backup`) before linking. `./neovim/sync verify` asserts those paths are still symlinks into this repo (exits non-zero otherwise). To add a synced item, append it to the `ITEMS` list.
 - `claude-code/settings.json` — Claude Code global preferences (model, permission allowlist, env, the Notification hook, `extraKnownMarketplaces`, `enabledPlugins`). The Notification hook just runs `$HOME/.claude/hooks/notify.sh` (see below); it carries no inline logic. No secrets — credentials live separately in `~/.claude/.credentials.json`, which is never tracked here.
   - **Plugins are tracked here, not as vendored code.** Two keys make the plugin setup portable: `extraKnownMarketplaces` declares *where* plugins come from (the `anthropics/claude-plugins-official` GitHub marketplace) and `enabledPlugins` declares *which* are on. On a fresh machine Claude Code reads these and offers to install the marketplace + plugins. The `~/.claude/plugins/` files (`known_marketplaces.json`, `installed_plugins.json`, `cache/`, `marketplaces/`, `plugin-catalog-cache.json`) are deliberately **not** tracked — they're machine-specific local state (absolute paths, timestamps, commit SHAs, cloned source) that Claude Code regenerates.
@@ -26,6 +27,34 @@ Each app folder carries a self-contained `sync` script (`./sync` installs the sy
 - `claude-code/sync` — symlinks `settings.json`, `skills`, and `hooks` into `~/.claude`. **Unlike `neovim/sync`, it links and backs up _per item_, never the whole `~/.claude` dir** — that directory is a mix of tracked config and untracked credentials/session state, so it must not be moved or backed up wholesale. Pre-existing real items are backed up together into `backups/claude-code/<timestamp>/` and committed (via `repo_backup`) before linking; `~/.claude/.credentials.json` is not a tracked item, so it is never moved or committed.
 
 To **add a new app**: create a folder, drop its config files in, and add an executable `sync` script supporting `./sync` and `./sync verify` (use `neovim/sync` as a template). For backups, source `lib/backup.sh` and call `repo_backup "$SRC" <app> <paths>` — don't reinvent the per-app backup logic. The `Makefile` picks the app up automatically.
+
+## Git hooks
+
+Two repo-local git hooks live in the tracked, hidden `.githooks/` dir. Activate
+them once per clone with `make hooks`, which sets a repo-local
+`core.hooksPath = .githooks` — a **relative** value, so it resolves to each
+working tree's own `.githooks/` and one setting in the shared `.git/config`
+covers every worktree. This is deliberately **not** wired into `make`, so a plain
+`make` never touches your git config. Both hooks **no-op off `master`** (via the
+same `git symbolic-ref --short -q HEAD` check the `sync` scripts use), so
+feature-branch worktrees merge and pull freely.
+
+- `.githooks/pre-merge-commit` — blocks a merge that would create a merge commit
+  on `master` while the working tree has uncommitted **unstaged** changes
+  (`git diff-files --quiet`), so unrelated edits aren't folded into the merge.
+  Two cases are intentionally not gated here because they can't entangle work:
+  git itself already refuses a real merge with **staged** changes, and
+  fast-forward merges create no commit. Bypass with `git merge --no-verify`.
+- `.githooks/post-merge` — after `master` is updated by a merge/pull, runs `make`
+  to re-sync every app (displaced config is archived and committed by
+  `repo_backup`, so backups stay tracked). **Skips** when the merge changed only
+  `backups/` (or nothing) — e.g. pulling another machine's backup commits. Uses
+  `post-merge` only, so any backup commit `make` creates is a plain commit that
+  never re-triggers the hook (no loop).
+
+To change or add a hook, edit/add a file in `.githooks/` named after the git hook
+event and `chmod +x` it (`core.hooksPath` only runs executable hooks, and the bit
+must be committed). `make hooks` need not be re-run.
 
 ## Plugin management (lazy.nvim)
 

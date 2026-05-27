@@ -1,0 +1,27 @@
+#!/bin/sh
+# After master is updated by a merge/pull, re-sync every app (`make`) so any
+# newly-tracked items get linked. Displaced config is archived + committed by the
+# apps' own repo_backup (lib/backup.sh), so backups stay version-controlled.
+#
+#   - Off master this is a no-op: merges in feature-branch worktrees don't sync.
+#   - Skips when the merge brought in nothing, or touched only backups/ (e.g.
+#     pulling another machine's repo_backup commits) — nothing to apply.
+#   - No loop: the only commit `make` may create (repo_backup) is a plain commit,
+#     which never re-fires post-merge (and we deliberately don't hook post-commit).
+#   - Failure-tolerant: post-merge can't unwind the merge, so we warn and exit 0.
+set -e
+
+[ "$(git symbolic-ref --short -q HEAD || true)" = "master" ] || exit 0
+
+base=$(git rev-parse -q --verify ORIG_HEAD || true)
+if [ -n "$base" ]; then
+    changed=$(git diff --name-only "$base" HEAD)
+    if [ -z "$changed" ] || ! printf '%s\n' "$changed" | grep -qv '^backups/'; then
+        echo "post-merge: only backups/ (or nothing) changed — skipping dotfiles sync"
+        exit 0
+    fi
+fi
+
+echo "post-merge: syncing dotfiles…"
+cd "$(git rev-parse --show-toplevel)"
+make || echo "post-merge: sync reported errors (the merge itself is fine)" >&2

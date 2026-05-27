@@ -1,0 +1,23 @@
+#!/bin/sh
+# Block a merge that would create a merge commit on master while the working tree
+# has uncommitted (unstaged) changes, so unrelated edits aren't swept into the
+# merge. Bypassable with `git merge --no-verify` if you really mean it.
+#
+# What this does and doesn't cover:
+#   - git itself already aborts a real merge when changes are STAGED, so the only
+#     gap this closes is UNSTAGED dirt in files the merge doesn't touch.
+#     `git diff-files --quiet` is exactly that signal: it compares the working
+#     tree to the index, so it ignores the staged merge result and never
+#     false-positives on an otherwise-clean merge.
+#   - Fast-forward merges create no commit, so this hook never fires for them and
+#     uncommitted work survives them untouched — intentionally not gated.
+#   - Off master this is a no-op: feature branches / worktrees merge freely.
+set -e
+
+[ "$(git symbolic-ref --short -q HEAD || true)" = "master" ] || exit 0
+
+if ! git diff-files --quiet; then
+    echo "merge blocked: uncommitted changes in the working tree." >&2
+    echo "Commit or stash them before merging on master." >&2
+    exit 1
+fi
