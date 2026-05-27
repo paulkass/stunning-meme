@@ -25,8 +25,16 @@
       }
     ]
   },
-  "skipDangerousModePermissionPrompt": true,
-  "skipAutoPermissionPrompt": true,
+  "worktree": {
+    "baseRef": "head"
+  },
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "context7@claude-plugins-official": true
+  },
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
       "source": {
@@ -36,12 +44,6 @@
       "autoUpdate": true
     }
   },
-  "enabledPlugins": {
-    "skill-creator@claude-plugins-official": true,
-    "commit-commands@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true
-  },
-  "worktree": {
-    "baseRef": "head"
-  }
+  "skipDangerousModePermissionPrompt": true,
+  "skipAutoPermissionPrompt": true
 }
