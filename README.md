@@ -4,10 +4,10 @@ Personal dotfiles. Each application's config lives in its own folder with a
 self-contained `sync` script; a top-level `Makefile` is the main interface and
 auto-discovers those scripts.
 
-Neovim was the first app: plain Vimscript `init.vim` with plugins managed by
-[lazy.nvim](https://github.com/folke/lazy.nvim). lazy.nvim bootstraps itself and
-installs plugins into `~/.local/share/nvim/lazy/`, so no plugin code is vendored
-here.
+Neovim was the first app: a Lua config (`init.lua` plus modules under `lua/`)
+with plugins managed by [lazy.nvim](https://github.com/folke/lazy.nvim).
+lazy.nvim bootstraps itself and installs plugins into `~/.local/share/nvim/lazy/`,
+so no plugin code is vendored here.
 
 ## Layout
 
@@ -17,9 +17,13 @@ here.
 - `backups/` — committed backups of config a `sync` displaced on first install
   (`backups/<app>/<timestamp>/`); see `backups/README.md`.
 - `neovim/` — Neovim config.
-  - `init.vim` — settings, mappings, and the lazy.nvim plugin spec.
+  - `init.lua` — entry point: sets the leader, loads the `lua/config` modules,
+    bootstraps lazy.nvim, and auto-imports plugin specs.
+  - `lua/config/` — editor settings (`options.lua`) and mappings (`keymaps.lua`).
+  - `lua/plugins/` — one file per plugin, each returning a lazy.nvim spec.
   - `lazy-lock.json` — pinned plugin versions.
-  - `sync` — symlinks this config into `~/.config/nvim`; `./sync verify` checks it.
+  - `sync` — symlinks `init.lua`, `lua/`, and `lazy-lock.json` into `~/.config/nvim`;
+    `./sync verify` checks it.
 - `claude-code/` — Claude Code user config.
   - `settings.json` — global preferences (model, permissions, hooks, env).
   - `hooks/notify.sh` — cross-platform desktop-notification script for the
@@ -61,6 +65,6 @@ Then launch `nvim` — lazy.nvim bootstraps and installs the plugins on first st
 
 ## Adding a Neovim plugin
 
-Add a spec entry to the `require("lazy").setup({ ... })` table in
-`neovim/init.vim`, then run `:Lazy sync` and commit the updated
-`neovim/lazy-lock.json`.
+Create `neovim/lua/plugins/<name>.lua` returning a lazy.nvim spec table, then
+run `:Lazy sync` and commit the updated `neovim/lazy-lock.json`. No edit to
+`init.lua` is needed — `import = "plugins"` picks the file up.
