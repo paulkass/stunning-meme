@@ -3,10 +3,44 @@
 # A pre-existing config that isn't already linked to this repo is backed up
 # wholesale to ~/.config/nvim.bak.<timestamp>. Re-running once installed is a
 # no-op that just refreshes the symlinks.
+#
+# Usage:
+#   ./nvimlink          install (symlink) the config into ~/.config/nvim
+#   ./nvimlink verify   check each install path is still a symlink into this repo
 set -e
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
 DEST="$HOME/.config/nvim"
+ITEMS="init.vim lazy-lock.json"
+
+# Confirm every installed path is still a symlink resolving to this repo. Catches
+# the two ways the link can rot: replaced by a real file (silent divergence) or
+# left dangling (repo moved/renamed, or target absent on the checked-out commit).
+# Inode churn from git checkout/pull is fine by design — symlinks resolve by path.
+verify() {
+    rc=0
+    for item in $ITEMS; do
+        link="$DEST/$item"
+        target="$REPO/$item"
+        if [ ! -L "$link" ]; then
+            echo "FAIL $link is not a symlink (run ./nvimlink to fix)"
+            rc=1
+        elif [ "$(readlink "$link")" != "$target" ]; then
+            echo "FAIL $link -> $(readlink "$link") (expected $target)"
+            rc=1
+        elif [ ! -e "$link" ]; then
+            echo "FAIL $link is a dangling symlink -> $target (target missing)"
+            rc=1
+        else
+            echo "OK   $link -> $target"
+        fi
+    done
+    return "$rc"
+}
+
+if [ "$1" = "verify" ]; then
+    if verify; then exit 0; else exit 1; fi
+fi
 
 if [ -e "$DEST" ] && [ "$(readlink "$DEST/init.vim" 2>/dev/null)" != "$REPO/init.vim" ]; then
     backup="$DEST.bak.$(date +%Y%m%d%H%M%S)"
@@ -15,7 +49,7 @@ if [ -e "$DEST" ] && [ "$(readlink "$DEST/init.vim" 2>/dev/null)" != "$REPO/init
 fi
 
 mkdir -p "$DEST"
-for item in init.vim lazy-lock.json; do
+for item in $ITEMS; do
     if [ -e "$REPO/$item" ]; then
         ln -sfn "$REPO/$item" "$DEST/$item"
         echo "Linked $DEST/$item -> $REPO/$item"

@@ -10,7 +10,7 @@ A personal **Neovim** configuration. The "product" is the config itself, consume
 
 - `init.vim` — the entire config: settings, mappings, and the plugin spec. Plain Vimscript with one embedded `lua << EOF ... EOF` block for plugin management. `spring-night` is the active colorscheme (a lazy-managed plugin).
 - `lazy-lock.json` — lazy.nvim's pinned plugin versions. Commit it whenever it changes.
-- `nvimlink` — install script; symlinks `init.vim` and `lazy-lock.json` into `~/.config/nvim`, backing up any pre-existing config first.
+- `nvimlink` — install script; symlinks `init.vim` and `lazy-lock.json` into `~/.config/nvim`, backing up any pre-existing config first. `./nvimlink verify` asserts those paths are still symlinks into this repo (exits non-zero otherwise).
 
 ## Plugin management (lazy.nvim)
 
@@ -29,6 +29,7 @@ Note the colorscheme plugin is declared with `lazy = false, priority = 1000` so 
 ## Install / verify
 
 - Install: `./nvimlink` (then launch `nvim` to trigger first-run plugin install).
+- Verify the link is intact: `./nvimlink verify` (handy after moving the repo or switching to a branch that lacks these files — re-run `./nvimlink` to repair).
 - Headless smoke test: `nvim --headless "+source $HOME/.config/nvim/init.vim" +qa` should exit cleanly; `nvim --headless "+Lazy! sync" +qa` installs/updates plugins and regenerates `lazy-lock.json`.
 
 ## Possible future cleanup
