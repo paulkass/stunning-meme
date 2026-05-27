@@ -1,15 +1,14 @@
 #!/bin/sh
-# Symlink this repo's Neovim config into ~/.config/nvim.
+# Sync this Neovim config into ~/.config/nvim (symlinks), or verify it.
+#   ./sync          install / refresh the symlinks
+#   ./sync verify   check each link still points back into this repo
+#
 # A pre-existing config that isn't already linked to this repo is backed up
 # wholesale to ~/.config/nvim.bak.<timestamp>. Re-running once installed is a
 # no-op that just refreshes the symlinks.
-#
-# Usage:
-#   ./nvimlink          install (symlink) the config into ~/.config/nvim
-#   ./nvimlink verify   check each install path is still a symlink into this repo
 set -e
 
-REPO="$(cd "$(dirname "$0")" && pwd)"
+SRC="$(cd "$(dirname "$0")" && pwd)"   # the neovim/ dir in this repo
 DEST="$HOME/.config/nvim"
 ITEMS="init.vim lazy-lock.json"
 
@@ -21,9 +20,9 @@ verify() {
     rc=0
     for item in $ITEMS; do
         link="$DEST/$item"
-        target="$REPO/$item"
+        target="$SRC/$item"
         if [ ! -L "$link" ]; then
-            echo "FAIL $link is not a symlink (run ./nvimlink to fix)"
+            echo "FAIL $link is not a symlink (run ./sync to fix)"
             rc=1
         elif [ "$(readlink "$link")" != "$target" ]; then
             echo "FAIL $link -> $(readlink "$link") (expected $target)"
@@ -39,10 +38,12 @@ verify() {
 }
 
 if [ "$1" = "verify" ]; then
-    if verify; then exit 0; else exit 1; fi
+    verify
+    exit
 fi
 
-if [ -e "$DEST" ] && [ "$(readlink "$DEST/init.vim" 2>/dev/null)" != "$REPO/init.vim" ]; then
+# Back up a pre-existing real config dir, then (re)link each item.
+if [ -e "$DEST" ] && [ "$(readlink "$DEST/init.vim" 2>/dev/null)" != "$SRC/init.vim" ]; then
     backup="$DEST.bak.$(date +%Y%m%d%H%M%S)"
     echo "Backing up existing $DEST -> $backup"
     mv "$DEST" "$backup"
@@ -50,8 +51,8 @@ fi
 
 mkdir -p "$DEST"
 for item in $ITEMS; do
-    if [ -e "$REPO/$item" ]; then
-        ln -sfn "$REPO/$item" "$DEST/$item"
-        echo "Linked $DEST/$item -> $REPO/$item"
+    if [ -e "$SRC/$item" ]; then
+        ln -sfn "$SRC/$item" "$DEST/$item"
+        echo "Linked $DEST/$item -> $SRC/$item"
     fi
 done
