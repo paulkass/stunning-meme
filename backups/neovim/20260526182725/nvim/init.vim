@@ -1,0 +1,1 @@
+/home/paul/projects/stunning-meme/init.vim
