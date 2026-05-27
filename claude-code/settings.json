@@ -1,0 +1,33 @@
+{
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "300000"
+  },
+  "permissions": {
+    "allow": [
+      "WebFetch",
+      "Fetch(*)",
+      "WebSearch(*)",
+      "Bash(*)"
+    ],
+    "defaultMode": "auto"
+  },
+  "model": "opus",
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "INPUT=$(cat)\nMSG=$(printf '%s' \"$INPUT\" | jq -r '.message // .notification_type // \"Needs your input\"')\nCWD=$(printf '%s' \"$INPUT\" | jq -r '.cwd // \"\"')\nTRANSCRIPT=$(printf '%s' \"$INPUT\" | jq -r '.transcript_path // \"\"')\nPROJECT=$(basename \"$CWD\" 2>/dev/null)\nif [ -n \"$PROJECT\" ]; then TITLE=\"Claude Code · $PROJECT\"; else TITLE=\"Claude Code\"; fi\nSNIPPET=\"\"\nif [ -n \"$TRANSCRIPT\" ] && [ -f \"$TRANSCRIPT\" ]; then\n  SNIPPET=$(tac \"$TRANSCRIPT\" 2>/dev/null | jq -r 'select(.type==\"assistant\") | .message.content[]? | select(.type==\"text\") | .text' 2>/dev/null | head -n 1 | tr '\\n' ' ' | cut -c1-220)\nfi\nBODY=\"$MSG\"\n[ -n \"$SNIPPET\" ] && BODY=$(printf '%s\\n\\n“%s…”' \"$MSG\" \"$SNIPPET\")\nnotify-send -u normal -t 10000 -i dialog-information \"$TITLE\" \"$BODY\" 2>/dev/null || true",
+            "async": true
+          }
+        ]
+      }
+    ]
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "skipAutoPermissionPrompt": true,
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true
+  }
+}

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A personal **dotfiles** repo. Each application's config lives in its own top-level folder; **Neovim** (under `neovim/`) is the first app. The "product" is the configs themselves, consumed by each app at startup — there is no build, test, or lint step. The canonical source of truth is this repo; configs get symlinked into place (Neovim → `~/.config/nvim`).
+A personal **dotfiles** repo. Each application's config lives in its own top-level folder; the apps so far are **Neovim** (under `neovim/`) and **Claude Code** (under `claude-code/`). The "product" is the configs themselves, consumed by each app at startup — there is no build, test, or lint step. The canonical source of truth is this repo; configs get symlinked into place (Neovim → `~/.config/nvim`, Claude Code → `~/.claude`).
 
 Each app folder carries a self-contained `sync` script (`./sync` installs the symlinks, `./sync verify` checks them). The top-level `Makefile` is the main interface and **auto-discovers** apps by globbing `*/sync`, so adding an app needs no `Makefile` edits.
 
@@ -14,6 +14,9 @@ Each app folder carries a self-contained `sync` script (`./sync` installs the sy
 - `neovim/init.vim` — the entire Neovim config: settings, mappings, and the plugin spec. Plain Vimscript with one embedded `lua << EOF ... EOF` block for plugin management. `spring-night` is the active colorscheme (a lazy-managed plugin).
 - `neovim/lazy-lock.json` — lazy.nvim's pinned plugin versions. Commit it whenever it changes.
 - `neovim/sync` — install script (relocated from the old root `nvimlink`); symlinks `init.vim` and `lazy-lock.json` into `~/.config/nvim`, backing up any pre-existing config first. `./neovim/sync verify` asserts those paths are still symlinks into this repo (exits non-zero otherwise).
+- `claude-code/settings.json` — Claude Code global preferences (model, permission allowlist, env, the `notify-send` Notification hook, `enabledPlugins`). No secrets — credentials live separately in `~/.claude/.credentials.json`, which is never tracked here.
+- `claude-code/skills/` — user-authored skills, one folder per skill with a `SKILL.md` (currently `commit`). The whole dir is symlinked, so any skill created later (e.g. via skill-creator) is version-controlled automatically.
+- `claude-code/sync` — symlinks `settings.json` and `skills` into `~/.claude`. **Unlike `neovim/sync`, it links and backs up _per item_, never the whole `~/.claude` dir** — that directory is a mix of tracked config and untracked credentials/session state, so it must not be moved or backed up wholesale. A pre-existing real item is moved to `<item>.bak.<timestamp>` before linking.
 
 To **add a new app**: create a folder, drop its config files in, and add an executable `sync` script supporting `./sync` and `./sync verify` (use `neovim/sync` as a template). The `Makefile` picks it up automatically.
 

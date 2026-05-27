@@ -4,7 +4,7 @@ Personal dotfiles. Each application's config lives in its own folder with a
 self-contained `sync` script; a top-level `Makefile` is the main interface and
 auto-discovers those scripts.
 
-Neovim is the first app: plain Vimscript `init.vim` with plugins managed by
+Neovim was the first app: plain Vimscript `init.vim` with plugins managed by
 [lazy.nvim](https://github.com/folke/lazy.nvim). lazy.nvim bootstraps itself and
 installs plugins into `~/.local/share/nvim/lazy/`, so no plugin code is vendored
 here.
@@ -16,19 +16,30 @@ here.
   - `init.vim` — settings, mappings, and the lazy.nvim plugin spec.
   - `lazy-lock.json` — pinned plugin versions.
   - `sync` — symlinks this config into `~/.config/nvim`; `./sync verify` checks it.
+- `claude-code/` — Claude Code user config.
+  - `settings.json` — global preferences (model, permissions, hooks, env).
+  - `skills/` — user-authored skills (e.g. `commit`).
+  - `sync` — symlinks these into `~/.claude`; `./sync verify` checks it. Because
+    `~/.claude` also holds credentials and session state, only these tracked
+    items are linked/backed up — never the whole directory.
 
 ## Install
 
 ```sh
-make            # sync every app
-make verify     # verify every app's symlinks
-make neovim     # sync just neovim
+make              # sync every app
+make verify       # verify every app's symlinks
+make neovim       # sync just neovim
 make neovim.verify
+make claude-code  # sync just Claude Code
+make claude-code.verify
 ```
 
 `make neovim` symlinks the Neovim config into `~/.config/nvim`, backing up any
 pre-existing real config first. Then launch `nvim` — lazy.nvim bootstraps and
 installs the plugins on first start.
+
+`make claude-code` symlinks `settings.json` and `skills/` into `~/.claude`,
+backing up any pre-existing real versions per-item first.
 
 ## Adding a new app
 

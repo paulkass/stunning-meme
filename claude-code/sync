@@ -1,0 +1,60 @@
+#!/bin/sh
+# Sync this Claude Code config into ~/.claude (symlinks), or verify it.
+#   ./sync          install / refresh the symlinks
+#   ./sync verify   check each link still points back into this repo
+#
+# Unlike ~/.config/nvim, ~/.claude is a MIXED directory: it holds credentials
+# and live session state right next to the config we track. So we link and back
+# up INDIVIDUAL items here, and never touch the directory as a whole. A
+# pre-existing real item is moved to <item>.bak.<timestamp> before linking.
+# Re-running once installed is a no-op that just refreshes the symlinks.
+set -e
+
+SRC="$(cd "$(dirname "$0")" && pwd)"   # the claude-code/ dir in this repo
+DEST="$HOME/.claude"
+ITEMS="settings.json skills"
+
+# Confirm every installed path is still a symlink resolving to this repo. Catches
+# the two ways the link can rot: replaced by a real file (silent divergence) or
+# left dangling (repo moved/renamed, or target absent on the checked-out commit).
+# Inode churn from git checkout/pull is fine by design — symlinks resolve by path.
+verify() {
+    rc=0
+    for item in $ITEMS; do
+        link="$DEST/$item"
+        target="$SRC/$item"
+        if [ ! -L "$link" ]; then
+            echo "FAIL $link is not a symlink (run ./sync to fix)"
+            rc=1
+        elif [ "$(readlink "$link")" != "$target" ]; then
+            echo "FAIL $link -> $(readlink "$link") (expected $target)"
+            rc=1
+        elif [ ! -e "$link" ]; then
+            echo "FAIL $link is a dangling symlink -> $target (target missing)"
+            rc=1
+        else
+            echo "OK   $link -> $target"
+        fi
+    done
+    return "$rc"
+}
+
+if [ "$1" = "verify" ]; then
+    verify
+    exit
+fi
+
+# Per item: back up a pre-existing real path (file or dir), then (re)link it.
+mkdir -p "$DEST"
+for item in $ITEMS; do
+    [ -e "$SRC/$item" ] || continue
+    link="$DEST/$item"
+    target="$SRC/$item"
+    if [ -e "$link" ] && [ "$(readlink "$link" 2>/dev/null)" != "$target" ]; then
+        backup="$link.bak.$(date +%Y%m%d%H%M%S)"
+        echo "Backing up existing $link -> $backup"
+        mv "$link" "$backup"
+    fi
+    ln -sfn "$target" "$link"
+    echo "Linked $link -> $target"
+done
