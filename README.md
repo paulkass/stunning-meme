@@ -35,6 +35,11 @@ so no plugin code is vendored here.
   - `sync` — symlinks these into `~/.claude`; `./sync verify` checks it. Because
     `~/.claude` also holds credentials and session state, only these tracked
     items are linked/backed up — never the whole directory, never credentials.
+- `kitty/` — Kitty terminal config, ported from a KDE Konsole setup.
+  - `kitty.conf` — font (Hack 11pt), bottom tab bar, background opacity, and the
+    16-color ANSI palette, captured from a running Konsole via OSC color queries
+    (its built-in default palette, which Profile 1 actually renders).
+  - `sync` — symlinks `kitty.conf` into `~/.config/kitty`; `./sync verify` checks it.
 
 ## Install
 
@@ -45,6 +50,8 @@ make neovim       # sync just neovim
 make neovim.verify
 make claude-code  # sync just Claude Code
 make claude-code.verify
+make kitty        # sync just Kitty
+make kitty.verify
 ```
 
 `make neovim` symlinks the Neovim config into `~/.config/nvim`, backing up any
@@ -54,6 +61,9 @@ Then launch `nvim` — lazy.nvim bootstraps and installs the plugins on first st
 `make claude-code` symlinks `settings.json`, `skills/`, and `hooks/` into
 `~/.claude`, backing up any pre-existing real versions per-item into
 `backups/claude-code/<timestamp>/` (committed) first.
+
+`make kitty` symlinks `kitty.conf` into `~/.config/kitty`, backing up any
+pre-existing real config into `backups/kitty/<timestamp>/` (committed) first.
 
 ## Git hooks
 
