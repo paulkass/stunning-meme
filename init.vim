@@ -53,5 +53,3 @@ require("lazy").setup({
 
 vim.cmd.colorscheme("spring-night")
 EOF
-
-"colorscheme colors-wal

@@ -15,7 +15,7 @@ if [ -e "$DEST" ] && [ "$(readlink "$DEST/init.vim" 2>/dev/null)" != "$REPO/init
 fi
 
 mkdir -p "$DEST"
-for item in init.vim colors lazy-lock.json; do
+for item in init.vim lazy-lock.json; do
     if [ -e "$REPO/$item" ]; then
         ln -sfn "$REPO/$item" "$DEST/$item"
         echo "Linked $DEST/$item -> $REPO/$item"

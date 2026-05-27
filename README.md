@@ -10,8 +10,6 @@ vendored here.
 ## Layout
 
 - `init.vim` — settings, mappings, and the lazy.nvim plugin spec.
-- `colors/colors-wal.vim` — local pywal-generated colorscheme (currently
-  commented out in `init.vim`).
 - `lazy-lock.json` — pinned plugin versions.
 - `nvimlink` — install script.
 

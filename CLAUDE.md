@@ -8,10 +8,9 @@ A personal **Neovim** configuration. The "product" is the config itself, consume
 
 ## Files
 
-- `init.vim` — the entire config: settings, mappings, and the plugin spec. Plain Vimscript with one embedded `lua << EOF ... EOF` block for plugin management.
-- `colors/colors-wal.vim` — a local pywal-generated colorscheme. Currently inert (its `colorscheme colors-wal` line in `init.vim` is commented out); `spring-night` is the active scheme.
+- `init.vim` — the entire config: settings, mappings, and the plugin spec. Plain Vimscript with one embedded `lua << EOF ... EOF` block for plugin management. `spring-night` is the active colorscheme (a lazy-managed plugin).
 - `lazy-lock.json` — lazy.nvim's pinned plugin versions. Commit it whenever it changes.
-- `nvimlink` — install script; symlinks `init.vim`, `colors/`, and `lazy-lock.json` into `~/.config/nvim`, backing up any existing real directory first.
+- `nvimlink` — install script; symlinks `init.vim` and `lazy-lock.json` into `~/.config/nvim`, backing up any pre-existing config first.
 
 ## Plugin management (lazy.nvim)
 
