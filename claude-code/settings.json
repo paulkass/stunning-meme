@@ -40,5 +40,8 @@
     "skill-creator@claude-plugins-official": true,
     "commit-commands@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true
+  },
+  "worktree": {
+    "baseRef": "head"
   }
 }
