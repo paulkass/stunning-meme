@@ -42,6 +42,18 @@ if [ "$1" = "verify" ]; then
     exit
 fi
 
+# Only ever install from the canonical master branch. A worktree or feature
+# branch checks out under a different branch name, and linking from one would
+# point ~/.config/nvim at a path that vanishes when that checkout is removed —
+# leaving dangling links. Read-only verify (handled above) stays allowed
+# everywhere; pass FORCE=1 to override deliberately.
+branch=$(git -C "$SRC" symbolic-ref --short -q HEAD 2>/dev/null || true)
+if [ "${FORCE:-}" != "1" ] && [ -n "$branch" ] && [ "$branch" != "master" ]; then
+    echo "sync: refusing to install from branch '$branch' — run from master (the canonical checkout)." >&2
+    echo "sync: './sync verify' works anywhere; use FORCE=1 ./sync to override." >&2
+    exit 1
+fi
+
 # Back up a pre-existing real config dir, then (re)link each item.
 if [ -e "$DEST" ] && [ "$(readlink "$DEST/init.vim" 2>/dev/null)" != "$SRC/init.vim" ]; then
     backup="$DEST.bak.$(date +%Y%m%d%H%M%S)"

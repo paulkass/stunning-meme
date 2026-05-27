@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A personal **dotfiles** repo. Each application's config lives in its own top-level folder; the apps so far are **Neovim** (under `neovim/`) and **Claude Code** (under `claude-code/`). The "product" is the configs themselves, consumed by each app at startup — there is no build, test, or lint step. The canonical source of truth is this repo; configs get symlinked into place (Neovim → `~/.config/nvim`, Claude Code → `~/.claude`).
 
-Each app folder carries a self-contained `sync` script (`./sync` installs the symlinks, `./sync verify` checks them). The top-level `Makefile` is the main interface and **auto-discovers** apps by globbing `*/sync`, so adding an app needs no `Makefile` edits.
+Each app folder carries a self-contained `sync` script (`./sync` installs the symlinks, `./sync verify` checks them). Installing only runs from the canonical **master** branch — `./sync` refuses on any other branch (e.g. a git worktree) so the live config never gets linked to a checkout that will disappear; `./sync verify` is read-only and works anywhere, and `FORCE=1 ./sync` overrides the guard deliberately. The top-level `Makefile` is the main interface and **auto-discovers** apps by globbing `*/sync`, so adding an app needs no `Makefile` edits.
 
 ## Files
 
