@@ -4,13 +4,16 @@
 #   ./sync verify   check each link still points back into this repo
 #
 # A pre-existing config that isn't already linked to this repo is backed up
-# wholesale to ~/.config/nvim.bak.<timestamp>. Re-running once installed is a
-# no-op that just refreshes the symlinks.
+# wholesale into this repo at backups/neovim/<timestamp>/ and committed (see
+# lib/backup.sh). Re-running once installed is a no-op that just refreshes the
+# symlinks.
 set -e
 
 SRC="$(cd "$(dirname "$0")" && pwd)"   # the neovim/ dir in this repo
 DEST="$HOME/.config/nvim"
 ITEMS="init.lua lua lazy-lock.json"
+
+. "$SRC/../lib/backup.sh"               # provides repo_backup
 
 # Confirm every installed path is still a symlink resolving to this repo. Catches
 # the two ways the link can rot: replaced by a real file (silent divergence) or
@@ -54,11 +57,9 @@ if [ "${FORCE:-}" != "1" ] && [ -n "$branch" ] && [ "$branch" != "master" ]; the
     exit 1
 fi
 
-# Back up a pre-existing real config dir, then (re)link each item.
+# Back up a pre-existing real config dir into the repo, then (re)link each item.
 if [ -e "$DEST" ] && [ "$(readlink "$DEST/init.lua" 2>/dev/null)" != "$SRC/init.lua" ]; then
-    backup="$DEST.bak.$(date +%Y%m%d%H%M%S)"
-    echo "Backing up existing $DEST -> $backup"
-    mv "$DEST" "$backup"
+    repo_backup "$SRC" neovim "$DEST"
 fi
 
 mkdir -p "$DEST"

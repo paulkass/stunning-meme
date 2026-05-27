@@ -6,13 +6,16 @@
 # Unlike ~/.config/nvim, ~/.claude is a MIXED directory: it holds credentials
 # and live session state right next to the config we track. So we link and back
 # up INDIVIDUAL items here, and never touch the directory as a whole. A
-# pre-existing real item is moved to <item>.bak.<timestamp> before linking.
-# Re-running once installed is a no-op that just refreshes the symlinks.
+# pre-existing real item is backed up into this repo at
+# backups/claude-code/<timestamp>/ and committed (see lib/backup.sh) before
+# linking. Re-running once installed is a no-op that just refreshes the symlinks.
 set -e
 
 SRC="$(cd "$(dirname "$0")" && pwd)"   # the claude-code/ dir in this repo
 DEST="$HOME/.claude"
 ITEMS="settings.json skills hooks"
+
+. "$SRC/../lib/backup.sh"               # provides repo_backup
 
 # Confirm every installed path is still a symlink resolving to this repo. Catches
 # the two ways the link can rot: replaced by a real file (silent divergence) or
@@ -56,17 +59,25 @@ if [ "${FORCE:-}" != "1" ] && [ -n "$branch" ] && [ "$branch" != "master" ]; the
     exit 1
 fi
 
-# Per item: back up a pre-existing real path (file or dir), then (re)link it.
+# Collect the pre-existing real items we're about to displace, back them up
+# together (one commit under backups/claude-code/<timestamp>/), then (re)link.
+# Only the tracked ITEMS are ever touched — never the whole ~/.claude dir, and
+# never ~/.claude/.credentials.json, which is not an ITEM.
 mkdir -p "$DEST"
+needs_backup=""
 for item in $ITEMS; do
     [ -e "$SRC/$item" ] || continue
     link="$DEST/$item"
-    target="$SRC/$item"
-    if [ -e "$link" ] && [ "$(readlink "$link" 2>/dev/null)" != "$target" ]; then
-        backup="$link.bak.$(date +%Y%m%d%H%M%S)"
-        echo "Backing up existing $link -> $backup"
-        mv "$link" "$backup"
+    if [ -e "$link" ] && [ "$(readlink "$link" 2>/dev/null)" != "$SRC/$item" ]; then
+        needs_backup="$needs_backup $link"
     fi
-    ln -sfn "$target" "$link"
-    echo "Linked $link -> $target"
+done
+if [ -n "$needs_backup" ]; then
+    repo_backup "$SRC" claude-code $needs_backup
+fi
+
+for item in $ITEMS; do
+    [ -e "$SRC/$item" ] || continue
+    ln -sfn "$SRC/$item" "$DEST/$item"
+    echo "Linked $DEST/$item -> $SRC/$item"
 done
