@@ -10,7 +10,7 @@ set -e
 
 SRC="$(cd "$(dirname "$0")" && pwd)"   # the neovim/ dir in this repo
 DEST="$HOME/.config/nvim"
-ITEMS="init.vim lazy-lock.json"
+ITEMS="init.lua lua lazy-lock.json"
 
 # Confirm every installed path is still a symlink resolving to this repo. Catches
 # the two ways the link can rot: replaced by a real file (silent divergence) or
@@ -55,7 +55,7 @@ if [ "${FORCE:-}" != "1" ] && [ -n "$branch" ] && [ "$branch" != "master" ]; the
 fi
 
 # Back up a pre-existing real config dir, then (re)link each item.
-if [ -e "$DEST" ] && [ "$(readlink "$DEST/init.vim" 2>/dev/null)" != "$SRC/init.vim" ]; then
+if [ -e "$DEST" ] && [ "$(readlink "$DEST/init.lua" 2>/dev/null)" != "$SRC/init.lua" ]; then
     backup="$DEST.bak.$(date +%Y%m%d%H%M%S)"
     echo "Backing up existing $DEST -> $backup"
     mv "$DEST" "$backup"

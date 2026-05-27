@@ -11,9 +11,12 @@ Each app folder carries a self-contained `sync` script (`./sync` installs the sy
 ## Files
 
 - `Makefile` — top-level interface. Auto-discovers each app's `sync` script and exposes `make` (sync all), `make verify` (verify all), `make <app>` (sync one), `make <app>.verify` (verify one).
-- `neovim/init.vim` — the entire Neovim config: settings, mappings, and the plugin spec. Plain Vimscript with one embedded `lua << EOF ... EOF` block for plugin management. `spring-night` is the active colorscheme (a lazy-managed plugin).
+- `neovim/init.lua` — the Neovim entry point: sets the leader, requires the config modules, bootstraps lazy.nvim, and auto-imports plugin specs (`import = "plugins"`).
+- `neovim/lua/config/options.lua` — editor settings (the `vim.opt.*` lines). `termguicolors` is set here, before the colorscheme loads.
+- `neovim/lua/config/keymaps.lua` — every mapping, each defined with `vim.keymap.set` and a `desc`. The `desc` is the single source of truth for discovery — see "Discovering keybindings" below. Do not hand-maintain a separate cheatsheet.
+- `neovim/lua/plugins/*.lua` — one file per plugin, each returning a lazy.nvim spec. `import = "plugins"` in `init.lua` loads them all. Current files: `colorscheme.lua` (spring-night), `which-key.lua`, `telescope.lua`.
 - `neovim/lazy-lock.json` — lazy.nvim's pinned plugin versions. Commit it whenever it changes.
-- `neovim/sync` — install script (relocated from the old root `nvimlink`); symlinks `init.vim` and `lazy-lock.json` into `~/.config/nvim`, backing up any pre-existing config first. `./neovim/sync verify` asserts those paths are still symlinks into this repo (exits non-zero otherwise).
+- `neovim/sync` — install script (relocated from the old root `nvimlink`); symlinks `init.lua`, the `lua/` directory, and `lazy-lock.json` into `~/.config/nvim`, backing up any pre-existing config first. `./neovim/sync verify` asserts those paths are still symlinks into this repo (exits non-zero otherwise). To add a synced item, append it to the `ITEMS` list.
 - `claude-code/settings.json` — Claude Code global preferences (model, permission allowlist, env, the Notification hook, `enabledPlugins`). The Notification hook just runs `$HOME/.claude/hooks/notify.sh` (see below); it carries no inline logic. No secrets — credentials live separately in `~/.claude/.credentials.json`, which is never tracked here.
 - `claude-code/hooks/notify.sh` — cross-platform desktop-notification script invoked by the `Notification` hook. Reads the hook JSON on stdin and dispatches to the first available notifier (`terminal-notifier` or `osascript` on macOS, `notify-send` on Linux); on a machine with none (headless/SSH, no libnotify) it exits 0 silently. `jq` and the transcript snippet are optional — it degrades instead of failing. The whole `hooks/` dir is symlinked into `~/.claude/hooks`.
 - `claude-code/skills/` — user-authored skills, one folder per skill with a `SKILL.md` (currently `commit`). The whole dir is symlinked, so any skill created later (e.g. via skill-creator) is version-controlled automatically.
@@ -23,24 +26,32 @@ To **add a new app**: create a folder, drop its config files in, and add an exec
 
 ## Plugin management (lazy.nvim)
 
-Plugins are managed by [lazy.nvim](https://github.com/folke/lazy.nvim), **not** pathogen or vim-plug (both were removed). The `lua` block in `init.vim` bootstraps lazy.nvim (clones it to `~/.local/share/nvim/lazy/` on first launch) and declares plugins. No plugin code is vendored in this repo — lazy fetches everything at runtime.
+Plugins are managed by [lazy.nvim](https://github.com/folke/lazy.nvim), **not** pathogen or vim-plug (both were removed). `init.lua` bootstraps lazy.nvim (clones it to `~/.local/share/nvim/lazy/` on first launch) and calls `require("lazy").setup({ import = "plugins" })`, which loads every spec file under `neovim/lua/plugins/`. No plugin code is vendored in this repo — lazy fetches everything at runtime.
 
-**To add a plugin**: add a spec entry to the `require("lazy").setup({ ... })` table in `neovim/init.vim`, then run `:Lazy sync`, and commit the updated `neovim/lazy-lock.json`. Do not reintroduce pathogen/vim-plug or a `bundle/` directory.
+**To add a plugin**: create `neovim/lua/plugins/<name>.lua` returning a lazy spec table, then run `:Lazy sync`, and commit the updated `neovim/lazy-lock.json`. No edit to `init.lua` is needed — `import = "plugins"` picks the file up. Do not reintroduce pathogen/vim-plug or a `bundle/` directory.
 
-Note the colorscheme plugin is declared with `lazy = false, priority = 1000` so it loads eagerly before other startup; `vim.cmd.colorscheme(...)` is called right after `setup()`. Keep `set termguicolors` (in the Vimscript above the `lua` block) ahead of that call.
+**Prefer declaring a plugin's keymaps in its spec's `keys = {}` field with a `desc`** (rather than letting the plugin map them internally on load). lazy registers those as load-trigger stubs at startup, so they appear in which-key and `:Telescope keymaps` even before the plugin loads. See "Discovering keybindings".
+
+The colorscheme spec (`plugins/colorscheme.lua`) is declared with `lazy = false, priority = 1000` so it loads eagerly before other startup; its `config` calls `vim.cmd.colorscheme(...)`. Keep `opt.termguicolors` (in `lua/config/options.lua`, which runs before lazy) ahead of that.
 
 ## Conventions
 
-- **Leader** is `\` (`let mapleader="\\"`), set before the `lua` block — lazy.nvim requires the leader to be set before it loads.
-- `inoremap jk <Esc>` is the escape convention; `tnoremap <Esc>` exits terminal mode.
-- `<leader>nv` opens `~/.config/nvim/init.vim`. `<leader>rl` re-sources it, but note lazy.nvim does **not** support re-sourcing the config — it prints "Re-sourcing your config is not supported with lazy.nvim". Restart Neovim (or use `:Lazy reload`) to apply changes.
+- **Leader** is `\` (`vim.g.mapleader = "\\"`), set at the top of `init.lua` before lazy loads — lazy.nvim requires the leader to be set before it loads.
+- Every mapping in `lua/config/keymaps.lua` is defined with `vim.keymap.set(mode, lhs, rhs, { desc = "..." })`. Always include a `desc` — it is what populates the discovery tooling.
+- `jk` (insert) is the escape convention; `<Esc>` (terminal) exits terminal mode.
+- `<leader>nv` opens the config (`$MYVIMRC`, i.e. `init.lua`). `<leader>rl` re-sources it, but note lazy.nvim does **not** support re-sourcing the config — it prints "Re-sourcing your config is not supported with lazy.nvim". Restart Neovim (or use `:Lazy reload`) to apply changes.
+
+## Discovering keybindings
+
+The `desc` on every mapping is the single source of truth — never hand-maintain a cheatsheet. Two complementary tools read those descriptions:
+
+- **which-key.nvim** (`plugins/which-key.lua`) — press `\` (leader) and pause for a popup of every binding under that prefix, organized into named groups via its `spec` (e.g. `{ "<leader>s", group = "search" }`). Add a `spec` line per new prefix to keep it organized. `<leader>?` shows buffer-local maps.
+- **Telescope keymaps** (`plugins/telescope.lua`) — `<leader>sk` (`:Telescope keymaps`) is a fuzzy-searchable index of every registered mapping; `<leader>sh` searches `:help`.
+
+Both enumerate Neovim's live keymap table, so **plugin keybinds appear automatically** with whatever `desc` the plugin set. The one gap is lazy-loaded plugins, whose internal maps don't exist until load — declaring those keys in the spec's `keys = {}` field with a `desc` (see "Plugin management") closes it.
 
 ## Install / verify
 
 - Install: `make neovim` (or `make` for every app), then launch `nvim` to trigger first-run plugin install. `make neovim` is equivalent to running `./neovim/sync` directly.
 - Verify the link is intact: `make neovim.verify` (or `make verify` for every app) — handy after moving the repo or switching to a branch that lacks these files; re-run `make neovim` to repair.
-- Headless smoke test: `nvim --headless "+source $HOME/.config/nvim/init.vim" +qa` should exit cleanly; `nvim --headless "+Lazy! sync" +qa` installs/updates plugins and regenerates `lazy-lock.json` (written through the symlink into `neovim/`).
-
-## Possible future cleanup
-
-`neovim/init.vim` keeps a couple of Vim-era lines from the original config (`set nocompatible`, `set encoding=utf-8`) that are no-ops under Neovim, and a full conversion to `init.lua` would be more idiomatic. Both are intentionally out of scope to stay faithful to the canonical config — only change them if the user asks.
+- Headless smoke test: `nvim --headless +qa` should exit cleanly (the config loads on startup); `nvim --headless "+Lazy! sync" +qa` installs/updates plugins and regenerates `lazy-lock.json` (written through the symlink into `neovim/`).
