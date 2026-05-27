@@ -18,6 +18,11 @@ syntax on
 set equalalways
 set backspace=indent,eol,start
 
+" Disable modelines: they let arbitrary files set editor options (a security
+" risk) and cause spurious E518 errors on files whose contents merely look
+" like a modeline (e.g. JSON/prose containing "ex:" or "vim:").
+set nomodeline
+
 nnoremap <leader>z za
 nnoremap <leader>Z zA
 
