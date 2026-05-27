@@ -17,4 +17,3 @@ map("n", "<leader>C", "<cmd>nohlsearch<cr>", { desc = "Clear search highlight" }
 
 -- Config
 map("n", "<leader>nv", "<cmd>vsplit $MYVIMRC<cr>", { desc = "Edit config (init.lua)" })
-map("n", "<leader>rl", "<cmd>source $MYVIMRC<cr>", { desc = "Reload config (lazy may warn)" })

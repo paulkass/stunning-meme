@@ -73,7 +73,7 @@ The colorscheme spec (`plugins/colorscheme.lua`) is declared with `lazy = false,
 - **Leader** is `\` (`vim.g.mapleader = "\\"`), set at the top of `init.lua` before lazy loads — lazy.nvim requires the leader to be set before it loads.
 - Every mapping in `lua/config/keymaps.lua` is defined with `vim.keymap.set(mode, lhs, rhs, { desc = "..." })`. Always include a `desc` — it is what populates the discovery tooling.
 - `jk` (insert) is the escape convention; `<Esc>` (terminal) exits terminal mode.
-- `<leader>nv` opens the config (`$MYVIMRC`, i.e. `init.lua`). `<leader>rl` re-sources it, but note lazy.nvim does **not** support re-sourcing the config — it prints "Re-sourcing your config is not supported with lazy.nvim". Restart Neovim (or use `:Lazy reload`) to apply changes.
+- `<leader>nv` opens the config (`$MYVIMRC`, i.e. `init.lua`). There is intentionally **no** re-source mapping: lazy.nvim does not support re-sourcing the config (it prints "Re-sourcing your config is not supported with lazy.nvim"), so restart Neovim (or use `:Lazy reload`) to apply changes.
 
 ## Discovering keybindings
 
