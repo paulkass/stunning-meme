@@ -13,6 +13,14 @@ return {
   "folke/which-key.nvim",
   event = "VeryLazy",
   opts = {
+    -- How long to pause on a prefix before the popup appears. which-key's
+    -- default is 200ms; we lengthen it so the popup only shows up once you've
+    -- clearly paused and forgotten the next key, not on every quick chord.
+    -- Keep the function form so plugin-triggered popups (ctx.plugin, e.g.
+    -- <leader>?) still open instantly at 0ms.
+    delay = function(ctx)
+      return ctx.plugin and 0 or 1000
+    end,
     icons = {
       mappings = false,
       keys = {
