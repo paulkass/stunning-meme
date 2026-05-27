@@ -1,0 +1,23 @@
+#!/bin/sh
+# Symlink this repo's Neovim config into ~/.config/nvim.
+# A pre-existing config that isn't already linked to this repo is backed up
+# wholesale to ~/.config/nvim.bak.<timestamp>. Re-running once installed is a
+# no-op that just refreshes the symlinks.
+set -e
+
+REPO="$(cd "$(dirname "$0")" && pwd)"
+DEST="$HOME/.config/nvim"
+
+if [ -e "$DEST" ] && [ "$(readlink "$DEST/init.vim" 2>/dev/null)" != "$REPO/init.vim" ]; then
+    backup="$DEST.bak.$(date +%Y%m%d%H%M%S)"
+    echo "Backing up existing $DEST -> $backup"
+    mv "$DEST" "$backup"
+fi
+
+mkdir -p "$DEST"
+for item in init.vim colors lazy-lock.json; do
+    if [ -e "$REPO/$item" ]; then
+        ln -sfn "$REPO/$item" "$DEST/$item"
+        echo "Linked $DEST/$item -> $REPO/$item"
+    fi
+done

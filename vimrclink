@@ -1,8 +1,0 @@
-#!/bin/sh
-
-if [ "$1" = "-f" ]
-then
-    ln -f vimrc ~/.vimrc 
-else
-    ln vimrc ~/.vimrc
-fi
