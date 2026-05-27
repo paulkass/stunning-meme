@@ -18,6 +18,9 @@ here.
   - `sync` — symlinks this config into `~/.config/nvim`; `./sync verify` checks it.
 - `claude-code/` — Claude Code user config.
   - `settings.json` — global preferences (model, permissions, hooks, env).
+  - `hooks/notify.sh` — cross-platform desktop-notification script for the
+    `Notification` hook; dispatches to `terminal-notifier`/`osascript` (macOS) or
+    `notify-send` (Linux), and is a silent no-op where none exist.
   - `skills/` — user-authored skills (e.g. `commit`).
   - `sync` — symlinks these into `~/.claude`; `./sync verify` checks it. Because
     `~/.claude` also holds credentials and session state, only these tracked
@@ -38,8 +41,8 @@ make claude-code.verify
 pre-existing real config first. Then launch `nvim` — lazy.nvim bootstraps and
 installs the plugins on first start.
 
-`make claude-code` symlinks `settings.json` and `skills/` into `~/.claude`,
-backing up any pre-existing real versions per-item first.
+`make claude-code` symlinks `settings.json`, `skills/`, and `hooks/` into
+`~/.claude`, backing up any pre-existing real versions per-item first.
 
 ## Adding a new app
 

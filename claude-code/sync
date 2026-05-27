@@ -12,7 +12,7 @@ set -e
 
 SRC="$(cd "$(dirname "$0")" && pwd)"   # the claude-code/ dir in this repo
 DEST="$HOME/.claude"
-ITEMS="settings.json skills"
+ITEMS="settings.json skills hooks"
 
 # Confirm every installed path is still a symlink resolving to this repo. Catches
 # the two ways the link can rot: replaced by a real file (silent divergence) or
