@@ -11,7 +11,8 @@ so no plugin code is vendored here.
 
 ## Layout
 
-- `Makefile` — top-level interface; auto-discovers each app's `sync` script.
+- `Makefile` — top-level interface; auto-discovers each app's `sync` script and exposes `make setup` for machine bootstrap.
+- `setup` — Ubuntu/Debian bootstrap orchestrator; installs missing prerequisites and apps, skips existing installs by default, and then runs the normal sync flow.
 - `lib/backup.sh` — shared helper; each `sync` sources it to archive displaced
   config into `backups/` and commit it.
 - `backups/` — committed backups of config a `sync` displaced on first install
@@ -41,29 +42,34 @@ so no plugin code is vendored here.
     (its built-in default palette, which Profile 1 actually renders).
   - `sync` — symlinks `kitty.conf` into `~/.config/kitty`; `./sync verify` checks it.
 
-## Install
+## Setup and sync
 
 ```sh
-make              # sync every app
-make verify       # verify every app's symlinks
-make neovim       # sync just neovim
+make setup                         # install missing apps, then sync configs
+make setup SETUP_FLAGS="--check"   # report planned actions without changing state
+make setup SETUP_FLAGS="--app kitty --force"
+make                               # sync every app only
+make verify                        # verify every app's symlinks
+make neovim                        # sync just Neovim config
 make neovim.verify
-make claude-code  # sync just Claude Code
+make claude-code                   # sync just Claude Code config
 make claude-code.verify
-make kitty        # sync just Kitty
+make kitty                         # sync just Kitty config
 make kitty.verify
 ```
 
-`make neovim` symlinks the Neovim config into `~/.config/nvim`, backing up any
-pre-existing real config into `backups/neovim/<timestamp>/` (committed) first.
-Then launch `nvim` — lazy.nvim bootstraps and installs the plugins on first start.
+`make setup` is for Ubuntu/Debian machines. It installs missing core prerequisites
+(`curl`, `git`, `npm`/Node, `jq`) plus Neovim via apt, Kitty via the official
+binary installer, and Claude Code via npm (`@anthropic-ai/claude-code`). It skips
+apps that already exist by default, especially when they appear to come from a
+different source than this repo prefers; pass `--force` through `SETUP_FLAGS` to
+opt into reinstall/update behavior.
 
-`make claude-code` symlinks `settings.json`, `skills/`, and `hooks/` into
-`~/.claude`, backing up any pre-existing real versions per-item into
-`backups/claude-code/<timestamp>/` (committed) first.
-
-`make kitty` symlinks `kitty.conf` into `~/.config/kitty`, backing up any
-pre-existing real config into `backups/kitty/<timestamp>/` (committed) first.
+After dependency setup, the script runs the normal sync flow. The app-specific
+`make <app>` targets only link config files: `make neovim` links into
+`~/.config/nvim`, `make claude-code` links tracked items into `~/.claude`,
+and `make kitty` links into `~/.config/kitty`, backing up displaced real config
+into `backups/<app>/<timestamp>/` first.
 
 ## Git hooks
 

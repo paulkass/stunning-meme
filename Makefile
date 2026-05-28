@@ -6,18 +6,23 @@
 #   make verify          verify every app
 #   make neovim          sync just neovim
 #   make neovim.verify   verify just neovim
+#   make setup           install missing apps, then sync configs
+#   make setup SETUP_FLAGS="--check"
 #   make hooks           activate this repo's git hooks (one-time, see below)
 
 APPS   := $(notdir $(patsubst %/,%,$(dir $(wildcard */sync))))
 VERIFY := $(addsuffix .verify,$(APPS))
 
-.PHONY: all sync verify hooks $(APPS) $(VERIFY)
+.PHONY: all sync setup verify hooks $(APPS) $(VERIFY)
 
 all: sync
 
 sync: $(APPS)
 $(APPS):
 	@./$@/sync
+
+setup:
+	@./setup $(SETUP_FLAGS)
 
 verify: $(VERIFY)
 $(VERIFY): %.verify:

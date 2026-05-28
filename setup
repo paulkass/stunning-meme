@@ -1,0 +1,360 @@
+#!/bin/sh
+# Bootstrap this dotfiles repo on Debian-family systems.
+# Installs required applications when missing, leaves existing installs alone by
+# default, and then runs the existing config sync flow.
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+CHECK=0
+FORCE=0
+APP_FILTER=""
+APP_ORDER="neovim kitty claude-code"
+APT_UPDATED=0
+
+as_root() {
+    if [ "$(id -u)" = "0" ]; then
+        "$@"
+    else
+        sudo "$@"
+    fi
+}
+
+usage() {
+    cat <<'USAGE'
+Usage: ./setup [--check] [--force] [--app NAME]
+
+Options:
+  --check       Report planned actions without changing system state.
+  --force       Reinstall/update managed tools instead of skipping mismatches.
+  --app NAME    Limit app setup to one app: neovim, kitty, or claude-code.
+  -h, --help    Show this help.
+USAGE
+}
+
+log() {
+    printf '%s\n' "$*"
+}
+
+err() {
+    printf '%s\n' "$*" >&2
+}
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --check) CHECK=1 ;;
+        --force) FORCE=1 ;;
+        --app)
+            [ "$#" -gt 1 ] || { err "setup: --app requires a name"; exit 2; }
+            APP_FILTER=$2
+            shift
+            ;;
+        --app=*) APP_FILTER=${1#--app=} ;;
+        -h|--help) usage; exit 0 ;;
+        *) err "setup: unknown argument: $1"; usage >&2; exit 2 ;;
+    esac
+    shift
+done
+
+case "$APP_FILTER" in
+    ""|neovim|kitty|claude-code) ;;
+    *) err "setup: unknown app '$APP_FILTER' (expected neovim, kitty, or claude-code)"; exit 2 ;;
+esac
+
+os_release_file() {
+    printf '%s\n' "${SETUP_TEST_OS_RELEASE:-/etc/os-release}"
+}
+
+require_debian_platform() {
+    file=$(os_release_file)
+    [ -r "$file" ] || { err "setup: cannot read $file"; exit 1; }
+    # shellcheck disable=SC1090
+    . "$file"
+    id=${ID:-}
+    like=${ID_LIKE:-}
+    case " $id $like " in
+        *' debian '*|*' ubuntu '*) return 0 ;;
+    esac
+    err "setup: unsupported platform '$id' (ID_LIKE='$like'); v1 supports Ubuntu/Debian only"
+    exit 1
+}
+
+command_path() {
+    name=$1
+    if [ -n "${SETUP_TEST_COMMAND_DIR:-}" ]; then
+        if [ -x "$SETUP_TEST_COMMAND_DIR/$name" ]; then
+            printf '%s\n' "$SETUP_TEST_COMMAND_DIR/$name"
+            return 0
+        fi
+        return 1
+    fi
+    command -v "$name" 2>/dev/null
+}
+
+apt_marker() {
+    printf '%s/%s\n' "$SETUP_TEST_APT_MARKER_DIR" "$1"
+}
+
+apt_package_installed() {
+    pkg=$1
+    if [ -n "${SETUP_TEST_APT_MARKER_DIR:-}" ]; then
+        [ -e "$(apt_marker "$pkg")" ]
+        return
+    fi
+    dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q 'install ok installed'
+}
+
+apt_update_once() {
+    [ "$APT_UPDATED" -eq 1 ] && return 0
+    log "RUN apt-get update"
+    as_root apt-get update
+    APT_UPDATED=1
+}
+
+apt_install_package() {
+    label=$1
+    pkg=$2
+    if apt_package_installed "$pkg"; then
+        log "OK apt $label package $pkg installed"
+        return 0
+    fi
+    if [ "$CHECK" -eq 1 ]; then
+        log "CHECK apt $label would install package $pkg"
+        return 0
+    fi
+    apt_update_once
+    log "RUN apt-get install -y $pkg"
+    as_root apt-get install -y "$pkg"
+}
+
+ensure_command_package() {
+    label=$1
+    command_name=$2
+    pkg=$3
+    if command_path "$command_name" >/dev/null; then
+        log "OK prereq $label command $command_name present"
+        return 0
+    fi
+    apt_install_package "$label" "$pkg"
+}
+
+npm_marker() {
+    printf '%s/%s\n' "$SETUP_TEST_NPM_MARKER_DIR" "$1"
+}
+
+npm_global_installed() {
+    pkg=$1
+    if [ -n "${SETUP_TEST_NPM_MARKER_DIR:-}" ]; then
+        [ -e "$(npm_marker "$pkg")" ]
+        return
+    fi
+    npm list -g --depth=0 "$pkg" >/dev/null 2>&1
+}
+
+node_major_version() {
+    command_path node >/dev/null || return 1
+    version=$(node --version 2>/dev/null | sed 's/^v//' | sed 's/\..*$//')
+    case "$version" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+    printf '%s\n' "$version"
+}
+
+require_node_18() {
+    major=$(node_major_version 2>/dev/null || true)
+    if [ -n "$major" ] && [ "$major" -ge 18 ]; then
+        log "OK prereq node major version $major"
+        return 0
+    fi
+    if [ "$CHECK" -eq 1 ]; then
+        log "CHECK prereq node must be version 18+ before installing Claude Code"
+        return 0
+    fi
+    err "setup: Claude Code requires Node 18+; install a newer nodejs/npm and re-run setup"
+    exit 1
+}
+
+selected() {
+    app=$1
+    [ -z "$APP_FILTER" ] || [ "$APP_FILTER" = "$app" ]
+}
+
+ensure_prereqs() {
+    require_debian_platform
+    ensure_command_package curl curl curl
+    ensure_command_package git git git
+    ensure_command_package npm npm npm
+    ensure_command_package node node nodejs
+    ensure_command_package jq jq jq
+}
+
+install_neovim() {
+    selected neovim || return 0
+    if apt_package_installed neovim; then
+        log "OK apt neovim package neovim installed"
+        return 0
+    fi
+    existing=$(command_path nvim 2>/dev/null || true)
+    if [ -n "$existing" ] && [ "$FORCE" -ne 1 ]; then
+        log "SKIP neovim installed at $existing; preferred apt package neovim missing (use --force to install apt package)"
+        return 0
+    fi
+    apt_install_package neovim neovim
+}
+
+kitty_home() {
+    printf '%s/.local/kitty.app\n' "$HOME"
+}
+
+managed_kitty_bin() {
+    printf '%s/bin/kitty\n' "$(kitty_home)"
+}
+
+managed_kitten_bin() {
+    printf '%s/bin/kitten\n' "$(kitty_home)"
+}
+
+is_managed_kitty_command() {
+    path=$(command_path kitty 2>/dev/null || true)
+    [ -n "$path" ] || return 1
+    [ "$path" = "$(managed_kitty_bin)" ] && return 0
+    if [ -L "$path" ] && [ "$(readlink "$path")" = "$(managed_kitty_bin)" ]; then
+        return 0
+    fi
+    return 1
+}
+
+install_kitty_binary() {
+    if [ "$CHECK" -eq 1 ]; then
+        log "CHECK kitty would install official binary to $(kitty_home)"
+        return 0
+    fi
+    tmp=$(mktemp)
+    trap 'rm -f "$tmp"' INT TERM EXIT
+    log "RUN download kitty official installer"
+    curl -fsSL https://sw.kovidgoyal.net/kitty/installer.sh -o "$tmp"
+    log "RUN sh kitty installer"
+    sh "$tmp"
+    rm -f "$tmp"
+    trap - INT TERM EXIT
+}
+
+safe_link() {
+    label=$1
+    target=$2
+    link=$3
+    if [ -L "$link" ]; then
+        current=$(readlink "$link")
+        if [ "$current" = "$target" ]; then
+            log "OK $label link $link -> $target"
+            return 0
+        fi
+        if [ "$FORCE" -ne 1 ]; then
+            log "SKIP $label link $link -> $current; expected $target (use --force to replace)"
+            return 0
+        fi
+    elif [ -e "$link" ]; then
+        log "SKIP $label $link exists and is not a symlink"
+        return 0
+    fi
+    if [ "$CHECK" -eq 1 ]; then
+        log "CHECK $label would link $link -> $target"
+        return 0
+    fi
+    mkdir -p "$(dirname "$link")"
+    ln -sfn "$target" "$link"
+    log "Linked $link -> $target"
+}
+
+safe_copy_file() {
+    label=$1
+    src=$2
+    dest=$3
+    if [ -e "$dest" ] && [ "$FORCE" -ne 1 ]; then
+        log "SKIP $label $dest exists (use --force to replace)"
+        return 0
+    fi
+    if [ ! -e "$src" ]; then
+        log "SKIP $label source missing: $src"
+        return 0
+    fi
+    if [ "$CHECK" -eq 1 ]; then
+        log "CHECK $label would copy $src -> $dest"
+        return 0
+    fi
+    mkdir -p "$(dirname "$dest")"
+    cp "$src" "$dest"
+    log "Copied $dest"
+}
+
+integrate_kitty() {
+    safe_link kitty "$(managed_kitty_bin)" "$HOME/.local/bin/kitty"
+    safe_link kitty "$(managed_kitten_bin)" "$HOME/.local/bin/kitten"
+    safe_copy_file kitty "$(kitty_home)/share/applications/kitty.desktop" "$HOME/.local/share/applications/kitty.desktop"
+    safe_copy_file kitty "$(kitty_home)/share/applications/kitty-open.desktop" "$HOME/.local/share/applications/kitty-open.desktop"
+}
+
+install_kitty() {
+    selected kitty || return 0
+    if [ -x "$(managed_kitty_bin)" ]; then
+        log "OK kitty managed install present at $(kitty_home)"
+        integrate_kitty
+        return 0
+    fi
+    existing=$(command_path kitty 2>/dev/null || true)
+    if [ -n "$existing" ] && ! is_managed_kitty_command && [ "$FORCE" -ne 1 ]; then
+        log "SKIP kitty installed at $existing; preferred managed install missing (use --force to install official binary)"
+        return 0
+    fi
+    install_kitty_binary
+    if [ -x "$(managed_kitty_bin)" ] || [ "$CHECK" -eq 1 ]; then
+        integrate_kitty
+    fi
+}
+
+install_claude_code() {
+    selected claude-code || return 0
+    require_node_18
+    if npm_global_installed @anthropic-ai/claude-code; then
+        log "OK npm claude-code package @anthropic-ai/claude-code installed"
+        return 0
+    fi
+    existing=$(command_path claude 2>/dev/null || true)
+    if [ -n "$existing" ] && [ "$FORCE" -ne 1 ]; then
+        log "SKIP claude-code installed at $existing; preferred npm package @anthropic-ai/claude-code missing (use --force to install npm package)"
+        return 0
+    fi
+    if [ "$CHECK" -eq 1 ]; then
+        log "CHECK npm claude-code would install @anthropic-ai/claude-code globally"
+        return 0
+    fi
+    log "RUN npm install -g @anthropic-ai/claude-code"
+    npm install -g @anthropic-ai/claude-code
+}
+
+sync_configs() {
+    [ -z "$APP_FILTER" ] || return 0
+    if [ -n "${SETUP_TEST_DRY_RUN_SYNC:-}" ]; then
+        log "CHECK sync skipped by SETUP_TEST_DRY_RUN_SYNC"
+        return 0
+    fi
+    if [ "$CHECK" -eq 1 ]; then
+        log "CHECK sync would run make"
+        return 0
+    fi
+    log "RUN make"
+    make -C "$ROOT"
+}
+
+install_app() {
+    case "$1" in
+        neovim) install_neovim ;;
+        kitty) install_kitty ;;
+        claude-code) install_claude_code ;;
+    esac
+}
+
+ensure_prereqs
+for app in $APP_ORDER; do
+    install_app "$app"
+done
+sync_configs
