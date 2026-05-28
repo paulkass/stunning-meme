@@ -1,9 +1,14 @@
 playground/
 
-# Project-local Claude Code state (worktrees, session data) — not config.
+# Legacy project-local Claude Code state (worktrees, session data) — not config.
 # NB: this is the repo's own ./.claude dir, distinct from the tracked
 # claude-code/ app folder, which holds the config we sync into ~/.claude.
 .claude/
+
+# Project-local Codex config is tracked; runtime state stays local.
+.codex/*
+!.codex/
+!.codex/config.toml
 
 # The whole claude-code/skills dir is symlinked from ~/.claude/skills, so new
 # skills land here automatically — keep their SKILL.md, drop only OS cruft.
