@@ -3,12 +3,11 @@
 -- prefix groups so the popup stays organized as the config grows — add a line
 -- per new prefix, e.g. { "<leader>g", group = "git" }.
 --
--- Icons are disabled on purpose: which-key v3 prepends Nerd Font glyphs (before
--- each mapping via `icons.mappings`, and for special keys like Esc via
--- `icons.keys`). We don't assume a Nerd Font, so those render as tofu boxes on a
--- plain terminal. `mappings = false` drops the per-mapping icons; the `keys`
--- table is overridden with plain-text labels (omitted entries would keep their
--- glyph default, so override the full set). Leave it this way for portability.
+-- Nerd Font icons are enabled: kitty/kitty.conf pins `font_family Hack Nerd
+-- Font`, so which-key's default per-mapping glyphs and special-key icons
+-- (Esc, <CR>, modifier prefixes, etc.) render correctly. If this config is
+-- ever used on a terminal without a Nerd Font, set `icons.mappings = false`
+-- and override `icons.keys` with plain-text labels.
 return {
   "folke/which-key.nvim",
   event = "VeryLazy",
@@ -21,20 +20,9 @@ return {
     delay = function(ctx)
       return ctx.plugin and 0 or 1000
     end,
-    icons = {
-      mappings = false,
-      keys = {
-        Up = "<Up> ", Down = "<Down> ", Left = "<Left> ", Right = "<Right> ",
-        C = "<C-…> ", M = "<M-…> ", D = "<D-…> ", S = "<S-…> ",
-        CR = "<CR> ", Esc = "<Esc> ", ScrollWheelDown = "<ScrollWheelDown> ",
-        ScrollWheelUp = "<ScrollWheelUp> ", NL = "<NL> ", BS = "<BS> ",
-        Space = "<Space> ", Tab = "<Tab> ",
-        F1 = "<F1>", F2 = "<F2>", F3 = "<F3>", F4 = "<F4>", F5 = "<F5>", F6 = "<F6>",
-        F7 = "<F7>", F8 = "<F8>", F9 = "<F9>", F10 = "<F10>", F11 = "<F11>", F12 = "<F12>",
-      },
-    },
     spec = {
       { "<leader>s", group = "search" },
+      { "<leader>e", group = "explorer" },
     },
   },
   keys = {
