@@ -45,5 +45,6 @@
     }
   },
   "skipDangerousModePermissionPrompt": true,
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "agentPushNotifEnabled": true
 }
