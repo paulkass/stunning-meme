@@ -8,7 +8,7 @@ ROOT=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 CHECK=0
 FORCE=0
 APP_FILTER=""
-APP_ORDER="neovim kitty claude-code codex"
+APP_ORDER="neovim kitty tmux claude-code codex"
 APT_UPDATED=0
 
 as_root() {
@@ -26,7 +26,7 @@ Usage: ./setup [--check] [--force] [--app NAME]
 Options:
   --check       Report planned actions without changing system state.
   --force       Reinstall/update managed tools instead of skipping mismatches.
-  --app NAME    Limit app setup to one app: neovim, kitty, claude-code, or codex.
+  --app NAME    Limit app setup to one app: neovim, kitty, tmux, claude-code, or codex.
   -h, --help    Show this help.
 USAGE
 }
@@ -56,8 +56,8 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$APP_FILTER" in
-    ""|neovim|kitty|claude-code|codex) ;;
-    *) err "setup: unknown app '$APP_FILTER' (expected neovim, kitty, claude-code, or codex)"; exit 2 ;;
+    ""|neovim|kitty|tmux|claude-code|codex) ;;
+    *) err "setup: unknown app '$APP_FILTER' (expected neovim, kitty, tmux, claude-code, or codex)"; exit 2 ;;
 esac
 
 os_release_file() {
@@ -377,6 +377,11 @@ install_kitty() {
     fi
 }
 
+install_tmux() {
+    selected tmux || return 0
+    ensure_command_package tmux tmux tmux
+}
+
 install_claude_code() {
     selected claude-code || return 0
     require_node_18 "Claude Code"
@@ -435,6 +440,7 @@ install_app() {
     case "$1" in
         neovim) install_neovim ;;
         kitty) install_kitty ;;
+        tmux) install_tmux ;;
         claude-code) install_claude_code ;;
         codex) install_codex ;;
     esac

@@ -56,6 +56,8 @@ test_check_reports_missing_apps_without_installing() {
         fail "missing neovim check output"
     echo "$output" | grep -q "CHECK kitty would install official binary to" ||
         fail "missing kitty check output"
+    echo "$output" | grep -q "CHECK apt tmux would install package tmux" ||
+        fail "missing tmux check output"
     echo "$output" | grep -q "CHECK npm claude-code would install @anthropic-ai/claude-code globally" ||
         fail "missing claude-code check output"
     echo "$output" | grep -q "CHECK npm codex would install @openai/codex globally" ||
@@ -128,6 +130,15 @@ test_managed_kitty_creates_safe_integration_plan() {
         fail "kitty symlink integration not planned"
 }
 
+test_tmux_app_filter_is_supported() {
+    write_platform
+
+    output=$(run_setup --check --app tmux 2>&1)
+
+    echo "$output" | grep -q "CHECK apt tmux would install package tmux" ||
+        fail "tmux app filter did not plan apt install"
+}
+
 test_codex_app_filter_is_supported() {
     write_platform
     install_fake_command curl
@@ -173,6 +184,7 @@ test_managed_neovim_creates_safe_integration_plan
 test_unsupported_neovim_architecture_fails_clearly
 test_existing_wrong_kitty_is_skipped_without_force
 test_managed_kitty_creates_safe_integration_plan
+test_tmux_app_filter_is_supported
 test_codex_app_filter_is_supported
 test_existing_codex_is_skipped_without_force
 test_unsupported_platform_fails_clearly

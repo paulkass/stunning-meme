@@ -50,6 +50,10 @@ so no plugin code is vendored here.
     16-color ANSI palette, captured from a running Konsole via OSC color queries
     (its built-in default palette, which Profile 1 actually renders).
   - `sync` — symlinks `kitty.conf` into `~/.config/kitty`; `./sync verify` checks it.
+- `tmux/` — tmux terminal multiplexer config.
+  - `tmux.conf` — conservative defaults for truecolor, mouse support, vi-style
+    copy mode, larger scrollback, and simple split/pane bindings.
+  - `sync` — symlinks `tmux.conf` into `~/.tmux.conf`; `./sync verify` checks it.
 
 ## Setup and sync
 
@@ -58,6 +62,7 @@ make setup                         # install missing apps, then sync configs
 make setup SETUP_FLAGS="--check"   # report planned actions without changing state
 make setup SETUP_FLAGS="--app kitty --force"
 make setup SETUP_FLAGS="--app codex"
+make setup SETUP_FLAGS="--app tmux"
 make                               # sync every app only
 make verify                        # verify every app's symlinks
 make neovim                        # sync just Neovim config
@@ -68,26 +73,28 @@ make codex                         # sync just Codex config
 make codex.verify
 make kitty                         # sync just Kitty config
 make kitty.verify
+make tmux                          # sync just tmux config
+make tmux.verify
 ```
 
 `make setup` is for Ubuntu/Debian machines. It installs missing core prerequisites
 (`curl`, `git`, `unzip`, `npm`/Node, `jq`) plus Neovim from the latest upstream
 stable tarball into `~/.local/neovim`, Kitty via the official binary installer,
-Claude Code via npm (`@anthropic-ai/claude-code`), and Codex via npm
-(`@openai/codex`). It skips apps that already exist by default, especially when
-they appear to come from a different source than this repo prefers; pass
+tmux via apt, Claude Code via npm (`@anthropic-ai/claude-code`), and Codex via
+npm (`@openai/codex`). It skips apps that already exist by default, especially
+when they appear to come from a different source than this repo prefers; pass
 `--force` through `SETUP_FLAGS` to opt into reinstall/update behavior.
 
 After dependency setup, the script runs the normal sync flow. The app-specific
 `make <app>` targets only link config files: `make neovim` links into
 `~/.config/nvim`, `make claude-code` links tracked items into `~/.claude`,
 `make codex` links tracked user-authored files into `~/.codex`, and `make kitty`
-links into `~/.config/kitty`, backing up displaced real config into
-`backups/<app>/<timestamp>/` first.
+links into `~/.config/kitty`, and `make tmux` links into `~/.tmux.conf`,
+backing up displaced real config into `backups/<app>/<timestamp>/` first.
 
 Smoke tests are plain shell scripts: `sh tests/setup_test.sh` checks setup
-policy, and `sh tests/codex_sync_test.sh` checks the Codex sync migration against
-a temporary HOME.
+policy, `sh tests/codex_sync_test.sh` checks the Codex sync migration against a
+temporary HOME, and `sh tests/tmux_sync_test.sh` checks tmux link behavior.
 
 ## Git hooks
 

@@ -1,0 +1,79 @@
+#!/bin/sh
+# Sync this tmux config into ~/.tmux.conf (symlink), or verify it.
+#   ./sync          install / refresh the symlink
+#   ./sync verify   check the link still points back into this repo
+#
+# tmux reads ~/.tmux.conf by default across versions, so this app manages that
+# single home-directory file rather than a dedicated ~/.config/tmux directory.
+set -e
+
+SRC="$(cd "$(dirname "$0")" && pwd)"   # the tmux/ dir in this repo
+DEST="$HOME"
+ITEMS="tmux.conf"
+
+. "$SRC/../lib/backup.sh"               # provides repo_backup
+
+link_name() {
+    item=$1
+    case "$item" in
+        tmux.conf) printf '%s\n' ".tmux.conf" ;;
+        *) printf '%s\n' "$item" ;;
+    esac
+}
+
+verify() {
+    rc=0
+    for item in $ITEMS; do
+        name=$(link_name "$item")
+        link="$DEST/$name"
+        target="$SRC/$item"
+        if [ ! -L "$link" ]; then
+            echo "FAIL $link is not a symlink (run ./sync to fix)"
+            rc=1
+        elif [ "$(readlink "$link")" != "$target" ]; then
+            echo "FAIL $link -> $(readlink "$link") (expected $target)"
+            rc=1
+        elif [ ! -e "$link" ]; then
+            echo "FAIL $link is a dangling symlink -> $target (target missing)"
+            rc=1
+        else
+            echo "OK   $link -> $target"
+        fi
+    done
+    return "$rc"
+}
+
+if [ "$1" = "verify" ]; then
+    verify
+    exit
+fi
+
+# Only ever install from the canonical master branch. A worktree or feature
+# branch checks out under a different branch name, and linking from one would
+# point ~/.tmux.conf at a path that vanishes when that checkout is removed —
+# leaving dangling links. Read-only verify (handled above) stays allowed
+# everywhere; pass FORCE=1 to override deliberately.
+branch=$(git -C "$SRC" symbolic-ref --short -q HEAD 2>/dev/null || true)
+if [ "${FORCE:-}" != "1" ] && [ -n "$branch" ] && [ "$branch" != "master" ]; then
+    echo "sync: refusing to install from branch '$branch' — run from master (the canonical checkout)." >&2
+    echo "sync: './sync verify' works anywhere; use FORCE=1 ./sync to override." >&2
+    exit 1
+fi
+
+needs_backup=""
+for item in $ITEMS; do
+    name=$(link_name "$item")
+    link="$DEST/$name"
+    if [ -e "$link" ] && [ "$(readlink "$link" 2>/dev/null)" != "$SRC/$item" ]; then
+        needs_backup="$needs_backup $link"
+    fi
+done
+if [ -n "$needs_backup" ]; then
+    repo_backup "$SRC" tmux $needs_backup
+fi
+
+for item in $ITEMS; do
+    name=$(link_name "$item")
+    ln -sfn "$SRC/$item" "$DEST/$name"
+    echo "Linked $DEST/$name -> $SRC/$item"
+done
