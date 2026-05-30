@@ -162,3 +162,5 @@ prefix_rule(
 prefix_rule(pattern=["make"], decision="allow")
 prefix_rule(pattern=["git", "add"], decision="allow")
 prefix_rule(pattern=["git", "commit"], decision="allow")
+prefix_rule(pattern=["nvim", "--headless"], decision="allow")
+prefix_rule(pattern=["sh", "tests/neovim_lsp_test.sh"], decision="allow")

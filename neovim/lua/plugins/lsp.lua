@@ -19,12 +19,11 @@ return {
     },
     opts = {
       ensure_installed = { "basedpyright" },
-      automatic_enable = false,
+      automatic_enable = { "basedpyright" },
     },
     config = function(_, opts)
       require("mason").setup()
       require("mason-lspconfig").setup(opts)
-      vim.lsp.enable("basedpyright")
     end,
   },
 }
