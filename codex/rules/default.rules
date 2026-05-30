@@ -1,25 +1,14 @@
+# Basic shell inspection
 prefix_rule(
-  pattern = ["ls"],
+  pattern = [["ls", "pwd", "sort"]],
   decision = "allow",
-  justification = "Listing files is safe.",
+  justification = "Simple shell inspection commands are safe.",
 )
 
 prefix_rule(
-  pattern = ["pwd"],
+  pattern = [["cat", "sed", "head", "tail", "wc", "file", "stat"]],
   decision = "allow",
-  justification = "Printing the current directory is safe.",
-)
-
-prefix_rule(
-  pattern = ["cat"],
-  decision = "allow",
-  justification = "Reading files is safe inside the sandbox.",
-)
-
-prefix_rule(
-  pattern = ["sed"],
-  decision = "allow",
-  justification = "Text inspection is safe inside the sandbox.",
+  justification = "Reading and inspecting files is safe inside the sandbox.",
 )
 
 prefix_rule(
@@ -29,68 +18,144 @@ prefix_rule(
 )
 
 prefix_rule(
-  pattern = [["head", "tail", "wc", "file", "stat"]],
+  pattern = [["id", "groups", "lsb_release"]],
   decision = "allow",
-  justification = "File inspection commands are safe.",
+  justification = "Local environment inspection is safe.",
 )
 
 prefix_rule(
-  pattern = ["git", ["status", "diff", "log", "show", "branch"]],
+  pattern = ["command", "-v"],
+  decision = "allow",
+  justification = "Checking command availability is safe.",
+)
+
+# Git
+prefix_rule(
+  pattern = ["git", ["status", "diff", "log", "show", "branch", "ls-files", "config", "check-ignore", "rev-parse", "merge-base"]],
   decision = "allow",
   justification = "Read-only git inspection is safe.",
 )
 
 prefix_rule(
-  pattern = ["git", ["add", "commit", "push", "reset", "checkout", "switch", "clean", "rebase", "merge"]],
+  pattern = ["git", ["add", "commit", "mv", "push", "reset", "checkout", "switch", "clean", "rebase", "merge"]],
   decision = "allow",
-  justification = "Git mutation should be reviewed.",
+  justification = "Git mutation is allowed after explicit approval has established intent.",
 )
 
+# Local editing and test helpers
+prefix_rule(
+  pattern = ["mkdir", "-p"],
+  decision = "allow",
+  justification = "Creating directories for local workspace changes is safe.",
+)
+
+prefix_rule(
+  pattern = ["ln", "-s"],
+  decision = "allow",
+  justification = "Creating explicit symlinks is safe when requested by repo sync flows.",
+)
+
+prefix_rule(
+  pattern = ["perl", "-0pi"],
+  decision = "allow",
+  justification = "In-place text edits are allowed for repo maintenance.",
+)
+
+prefix_rule(
+  pattern = ["sh", "tests/setup_test.sh"],
+  decision = "allow",
+  justification = "Running the setup smoke test is safe.",
+)
+
+# Codex inspection and diagnostics
+prefix_rule(
+  pattern = ["codex", ["--help", "doctor", "features", "mcp", "exec", "debug"]],
+  decision = "allow",
+  justification = "Codex inspection and diagnostic commands are safe.",
+)
+
+prefix_rule(
+  pattern = ["codex", "--strict-config", "-C", "/home/paul/projects/stunning-meme", "--help"],
+  decision = "allow",
+  justification = "Strict config validation for this repo is safe.",
+)
+
+# Docker and host diagnostics
+prefix_rule(
+  pattern = ["docker", "context", "ls"],
+  decision = "allow",
+  justification = "Docker context inspection is safe.",
+)
+
+prefix_rule(
+  pattern = ["docker", ["inspect", "logs", "exec", "info", "top", "run"]],
+  decision = "allow",
+  justification = "Docker diagnostics and explicitly approved Docker operations are allowed.",
+)
+
+prefix_rule(
+  pattern = ["docker", "volume", "ls"],
+  decision = "allow",
+  justification = "Docker volume inspection is safe.",
+)
+
+prefix_rule(
+  pattern = ["docker", "ps", "-a"],
+  decision = "allow",
+  justification = "Docker container inspection is safe.",
+)
+
+prefix_rule(
+  pattern = ["docker", "rm"],
+  decision = "allow",
+  justification = "Docker container cleanup is allowed after explicit approval has established intent.",
+)
+
+prefix_rule(
+  pattern = ["docker", "network", ["ls", "rm"]],
+  decision = "allow",
+  justification = "Docker network inspection and cleanup are allowed.",
+)
+
+prefix_rule(
+  pattern = ["docker", "compose", "ls", "-a"],
+  decision = "allow",
+  justification = "Docker Compose project inspection is safe.",
+)
+
+prefix_rule(
+  pattern = [["ps", "pgrep"]],
+  decision = "allow",
+  justification = "Process inspection is safe.",
+)
+
+prefix_rule(
+  pattern = ["kill"],
+  decision = "allow",
+  justification = "Killing known local processes is allowed when needed to clean up a task.",
+)
+
+prefix_rule(
+  pattern = ["aa-status"],
+  decision = "allow",
+  justification = "Security profile inspection is safe.",
+)
+
+prefix_rule(
+  pattern = ["journalctl", "-u", "snap.docker.dockerd.service"],
+  decision = "allow",
+  justification = "Docker service log inspection is safe.",
+)
+
+prefix_rule(
+  pattern = ["systemctl", "status", "snap.docker.dockerd.service"],
+  decision = "allow",
+  justification = "Docker service diagnostics are safe.",
+)
+
+# Require review for broad destructive, privileged, or network-capable commands
 prefix_rule(
   pattern = [["rm", "rmdir", "mv", "cp", "chmod", "chown", "sudo", "curl", "wget"]],
   decision = "prompt",
   justification = "Potentially destructive, privilege-changing, or network command.",
 )
-prefix_rule(pattern=["sort"], decision="allow")
-prefix_rule(pattern=["git", "ls-files"], decision="allow")
-prefix_rule(pattern=["git", "config"], decision="allow")
-prefix_rule(pattern=["git", "check-ignore"], decision="allow")
-prefix_rule(pattern=["ln", "-s"], decision="allow")
-prefix_rule(pattern=["docker", "context", "ls"], decision="allow")
-prefix_rule(pattern=["id"], decision="allow")
-prefix_rule(pattern=["groups"], decision="allow")
-prefix_rule(pattern=["docker", "inspect"], decision="allow")
-prefix_rule(pattern=["docker", "volume", "ls"], decision="allow")
-prefix_rule(pattern=["ps"], decision="allow")
-prefix_rule(pattern=["pgrep"], decision="allow")
-prefix_rule(pattern=["docker", "logs"], decision="allow")
-prefix_rule(pattern=["docker", "exec"], decision="allow")
-prefix_rule(pattern=["docker", "ps", "-a"], decision="allow")
-prefix_rule(pattern=["docker", "rm"], decision="allow")
-prefix_rule(pattern=["journalctl", "-u", "snap.docker.dockerd.service"], decision="allow")
-prefix_rule(pattern=["docker", "info"], decision="allow")
-prefix_rule(pattern=["aa-status"], decision="allow")
-prefix_rule(pattern=["systemctl", "status", "snap.docker.dockerd.service"], decision="allow")
-prefix_rule(pattern=["docker", "top"], decision="allow")
-prefix_rule(pattern=["docker", "network", "ls"], decision="allow")
-prefix_rule(pattern=["docker", "network", "rm"], decision="allow")
-prefix_rule(pattern=["docker", "compose", "ls", "-a"], decision="allow")
-prefix_rule(pattern=["kill"], decision="allow")
-prefix_rule(pattern=["codex", "--help"], decision="allow")
-prefix_rule(pattern=["codex", "mcp"], decision="allow")
-prefix_rule(pattern=["codex", "doctor"], decision="allow")
-prefix_rule(pattern=["codex", "features"], decision="allow")
-prefix_rule(pattern=["git", "mv"], decision="allow")
-prefix_rule(pattern=["perl", "-0pi"], decision="allow")
-prefix_rule(pattern=["mkdir", "-p"], decision="allow")
-prefix_rule(pattern=["codex", "exec"], decision="allow")
-prefix_rule(pattern=["codex", "debug"], decision="allow")
-prefix_rule(pattern=["git", "rev-parse"], decision="allow")
-prefix_rule(pattern=["git", "merge-base"], decision="allow")
-prefix_rule(pattern=["codex", "--strict-config", "-C", "/home/paul/projects/stunning-meme", "--help"], decision="allow")
-prefix_rule(pattern=["command", "-v"], decision="allow")
-prefix_rule(pattern=["lsb_release"], decision="allow")
-prefix_rule(pattern=["sh", "tests/setup_test.sh"], decision="allow")
-prefix_rule(pattern=["docker", "run"], decision="allow")
-prefix_rule(pattern=["git", "add"], decision="allow")
-prefix_rule(pattern=["git", "commit"], decision="allow")
