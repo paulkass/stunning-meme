@@ -1,0 +1,20 @@
+# Personal Bash ergonomics managed by stunning-meme.
+
+set -o vi
+
+alias cl="clear"
+
+alias ga="git add"
+alias gs="git status"
+alias gc="git commit"
+alias gp="git pull"
+alias gl="git log"
+
+alias clc="claude"
+alias clcup="sudo npm i -g @anthropic-ai/claude-code"
+
+alias cdx="codex"
+alias cdxup="sudo npm i -g @openai/codex"
+
+alias pico-kali="docker run -it --rm -v .:/root/challenge kali-all"
+alias rot13="tr 'A-Za-z' 'N-ZA-Mn-za-m'"

@@ -1,0 +1,100 @@
+#!/bin/sh
+# Sync Bash custom settings into ~/.bashrc.d and ensure ~/.bashrc sources them.
+#   ./sync          install / refresh the symlink and source block
+#   ./sync verify   check the link and source block
+#
+# ~/.bashrc is usually distro-owned local startup glue, so this app does not
+# replace it. It links one repo-owned fragment and appends an idempotent managed
+# block that sources the fragment when present.
+set -e
+
+SRC="$(cd "$(dirname "$0")" && pwd)"   # the bash/ dir in this repo
+DEST="$HOME/.bashrc.d"
+BASHRC="$HOME/.bashrc"
+ITEM="bashrc"
+LINK_NAME="stunning-meme.sh"
+BEGIN_MARKER="# BEGIN stunning-meme bash settings"
+END_MARKER="# END stunning-meme bash settings"
+
+. "$SRC/../lib/backup.sh"               # provides repo_backup
+
+verify() {
+    rc=0
+    link="$DEST/$LINK_NAME"
+    target="$SRC/$ITEM"
+
+    if [ ! -L "$link" ]; then
+        echo "FAIL $link is not a symlink (run ./sync to fix)"
+        rc=1
+    elif [ "$(readlink "$link")" != "$target" ]; then
+        echo "FAIL $link -> $(readlink "$link") (expected $target)"
+        rc=1
+    elif [ ! -e "$link" ]; then
+        echo "FAIL $link is a dangling symlink -> $target (target missing)"
+        rc=1
+    else
+        echo "OK   $link -> $target"
+    fi
+
+    if [ ! -f "$BASHRC" ]; then
+        echo "FAIL $BASHRC is missing (run ./sync to fix)"
+        rc=1
+    elif ! grep -Fq "$BEGIN_MARKER" "$BASHRC" ||
+         ! grep -Fq ". \"\$HOME/.bashrc.d/$LINK_NAME\"" "$BASHRC" ||
+         ! grep -Fq "$END_MARKER" "$BASHRC"; then
+        echo "FAIL $BASHRC does not source $link (run ./sync to fix)"
+        rc=1
+    else
+        echo "OK   $BASHRC sources $link"
+    fi
+
+    return "$rc"
+}
+
+append_source_block() {
+    had_bashrc=1
+    [ -f "$BASHRC" ] || had_bashrc=0
+    [ "$had_bashrc" = 1 ] || : >"$BASHRC"
+
+    if grep -Fq "$BEGIN_MARKER" "$BASHRC"; then
+        return 0
+    fi
+
+    if [ "$had_bashrc" = 1 ] && [ "${STUNNING_MEME_SKIP_BACKUP:-}" != "1" ]; then
+        backup_tmp=$(mktemp -d)
+        cp "$BASHRC" "$backup_tmp/.bashrc"
+        repo_backup "$SRC" bash "$backup_tmp/.bashrc"
+        rm -rf "$backup_tmp"
+    fi
+
+    {
+        printf '\n%s\n' "$BEGIN_MARKER"
+        printf 'if [ -f "$HOME/.bashrc.d/%s" ]; then\n' "$LINK_NAME"
+        printf '    . "$HOME/.bashrc.d/%s"\n' "$LINK_NAME"
+        printf 'fi\n'
+        printf '%s\n' "$END_MARKER"
+    } >>"$BASHRC"
+}
+
+if [ "$1" = "verify" ]; then
+    verify
+    exit
+fi
+
+# Only ever install from the canonical master branch. A worktree or feature
+# branch checks out under a different branch name, and linking from one would
+# point ~/.bashrc.d at a path that vanishes when that checkout is removed —
+# leaving dangling links. Read-only verify (handled above) stays allowed
+# everywhere; pass FORCE=1 to override deliberately.
+branch=$(git -C "$SRC" symbolic-ref --short -q HEAD 2>/dev/null || true)
+if [ "${FORCE:-}" != "1" ] && [ -n "$branch" ] && [ "$branch" != "master" ]; then
+    echo "sync: refusing to install from branch '$branch' — run from master (the canonical checkout)." >&2
+    echo "sync: './sync verify' works anywhere; use FORCE=1 ./sync to override." >&2
+    exit 1
+fi
+
+mkdir -p "$DEST"
+ln -sfn "$SRC/$ITEM" "$DEST/$LINK_NAME"
+echo "Linked $DEST/$LINK_NAME -> $SRC/$ITEM"
+
+append_source_block

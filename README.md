@@ -50,6 +50,11 @@ so no plugin code is vendored here.
     16-color ANSI palette, captured from a running Konsole via OSC color queries
     (its built-in default palette, which Profile 1 actually renders).
   - `sync` — symlinks `kitty.conf` into `~/.config/kitty`; `./sync verify` checks it.
+- `bash/` — portable Bash ergonomics.
+  - `bashrc` — repo-owned fragment for vi mode and aliases only. Toolchain
+    initialization stays machine-local in `~/.bashrc`.
+  - `sync` — symlinks `bashrc` into `~/.bashrc.d/stunning-meme.sh` and appends an
+    idempotent managed source block to `~/.bashrc`; `./sync verify` checks both.
 - `tmux/` — tmux terminal multiplexer config.
   - `tmux.conf` — conservative defaults for truecolor, mouse support, vi-style
     copy mode, larger scrollback, and simple split/pane bindings.
@@ -73,6 +78,8 @@ make codex                         # sync just Codex config
 make codex.verify
 make kitty                         # sync just Kitty config
 make kitty.verify
+make bash                          # sync just Bash custom settings
+make bash.verify
 make tmux                          # sync just tmux config
 make tmux.verify
 ```
@@ -88,13 +95,16 @@ when they appear to come from a different source than this repo prefers; pass
 After dependency setup, the script runs the normal sync flow. The app-specific
 `make <app>` targets only link config files: `make neovim` links into
 `~/.config/nvim`, `make claude-code` links tracked items into `~/.claude`,
-`make codex` links tracked user-authored files into `~/.codex`, and `make kitty`
-links into `~/.config/kitty`, and `make tmux` links into `~/.tmux.conf`,
-backing up displaced real config into `backups/<app>/<timestamp>/` first.
+`make codex` links tracked user-authored files into `~/.codex`, `make kitty`
+links into `~/.config/kitty`, `make bash` links a repo-owned fragment into
+`~/.bashrc.d` and has `~/.bashrc` source it, and `make tmux` links into
+`~/.tmux.conf`, backing up displaced real config into
+`backups/<app>/<timestamp>/` first.
 
 Smoke tests are plain shell scripts: `sh tests/setup_test.sh` checks setup
 policy, `sh tests/codex_sync_test.sh` checks the Codex sync migration against a
-temporary HOME, and `sh tests/tmux_sync_test.sh` checks tmux link behavior.
+temporary HOME, `sh tests/bash_sync_test.sh` checks Bash source-block behavior,
+and `sh tests/tmux_sync_test.sh` checks tmux link behavior.
 
 ## Git hooks
 
