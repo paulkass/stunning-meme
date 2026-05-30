@@ -25,6 +25,11 @@ return {
     { "<leader>so", "<cmd>Telescope oldfiles<cr>",                  desc = "Recent files" },
     { "<leader>sw", "<cmd>Telescope grep_string<cr>",               desc = "Grep word under cursor" },
     { "<leader>s/", "<cmd>Telescope current_buffer_fuzzy_find<cr>", desc = "Fuzzy find in buffer" },
+    { "<leader>sd", "<cmd>Telescope lsp_definitions<cr>",           desc = "Search definitions" },
+    { "<leader>sr", "<cmd>Telescope lsp_references<cr>",            desc = "Search references" },
+    { "<leader>si", "<cmd>Telescope lsp_implementations<cr>",       desc = "Search implementations" },
+    { "<leader>ss", "<cmd>Telescope lsp_document_symbols<cr>",      desc = "Search document symbols" },
+    { "<leader>sS", "<cmd>Telescope lsp_workspace_symbols<cr>",     desc = "Search workspace symbols" },
   },
   opts = {
     extensions = { fzf = {} },

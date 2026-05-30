@@ -183,23 +183,88 @@ ensure_prereqs() {
     require_debian_platform
     ensure_command_package curl curl curl
     ensure_command_package git git git
+    ensure_command_package unzip unzip unzip
     ensure_command_package npm npm npm
     ensure_command_package node node nodejs
     ensure_command_package jq jq jq
 }
 
+machine_arch() {
+    if [ -n "${SETUP_TEST_UNAME_M:-}" ]; then
+        printf '%s\n' "$SETUP_TEST_UNAME_M"
+        return 0
+    fi
+    uname -m
+}
+
+neovim_asset_arch() {
+    arch=$(machine_arch)
+    case "$arch" in
+        x86_64|amd64) printf '%s\n' x86_64 ;;
+        aarch64|arm64) printf '%s\n' arm64 ;;
+        *) err "setup: unsupported Neovim architecture '$arch'"; return 1 ;;
+    esac
+}
+
+neovim_home() {
+    printf '%s/.local/neovim\n' "$HOME"
+}
+
+managed_neovim_bin() {
+    printf '%s/bin/nvim\n' "$(neovim_home)"
+}
+
+is_managed_neovim_command() {
+    path=$(command_path nvim 2>/dev/null || true)
+    [ -n "$path" ] || return 1
+    [ "$path" = "$(managed_neovim_bin)" ] && return 0
+    if [ -L "$path" ] && [ "$(readlink "$path")" = "$(managed_neovim_bin)" ]; then
+        return 0
+    fi
+    return 1
+}
+
+install_neovim_binary() {
+    asset_arch=$(neovim_asset_arch) || exit 1
+    asset="nvim-linux-$asset_arch.tar.gz"
+    url="https://github.com/neovim/neovim/releases/latest/download/$asset"
+    if [ "$CHECK" -eq 1 ]; then
+        log "CHECK neovim would install upstream stable tarball to $(neovim_home)"
+        return 0
+    fi
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' INT TERM EXIT
+    log "RUN download neovim upstream stable tarball"
+    curl -fsSL "$url" -o "$tmpdir/$asset"
+    log "RUN extract neovim upstream stable tarball"
+    tar -xzf "$tmpdir/$asset" -C "$tmpdir"
+    rm -rf "$(neovim_home)"
+    mkdir -p "$(dirname "$(neovim_home)")"
+    mv "$tmpdir/nvim-linux-$asset_arch" "$(neovim_home)"
+    rm -rf "$tmpdir"
+    trap - INT TERM EXIT
+}
+
+integrate_neovim() {
+    safe_link neovim "$(managed_neovim_bin)" "$HOME/.local/bin/nvim"
+}
+
 install_neovim() {
     selected neovim || return 0
-    if apt_package_installed neovim; then
-        log "OK apt neovim package neovim installed"
+    if [ -x "$(managed_neovim_bin)" ]; then
+        log "OK neovim managed install present at $(neovim_home)"
+        integrate_neovim
         return 0
     fi
     existing=$(command_path nvim 2>/dev/null || true)
-    if [ -n "$existing" ] && [ "$FORCE" -ne 1 ]; then
-        log "SKIP neovim installed at $existing; preferred apt package neovim missing (use --force to install apt package)"
+    if [ -n "$existing" ] && ! is_managed_neovim_command && [ "$FORCE" -ne 1 ]; then
+        log "SKIP neovim installed at $existing; preferred managed install missing (use --force to install upstream stable)"
         return 0
     fi
-    apt_install_package neovim neovim
+    install_neovim_binary
+    if [ -x "$(managed_neovim_bin)" ] || [ "$CHECK" -eq 1 ]; then
+        integrate_neovim
+    fi
 }
 
 kitty_home() {

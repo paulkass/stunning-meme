@@ -19,6 +19,7 @@ run_setup() {
     SETUP_TEST_NPM_MARKER_DIR="$WORK/npm-installed" \
     SETUP_TEST_COMMAND_DIR="$WORK/bin" \
     SETUP_TEST_DRY_RUN_SYNC=1 \
+    SETUP_TEST_UNAME_M="${SETUP_TEST_UNAME_M:-}" \
     "$ROOT/setup" "$@"
 }
 
@@ -51,7 +52,7 @@ test_check_reports_missing_apps_without_installing() {
 
     output=$(run_setup --check 2>&1)
 
-    echo "$output" | grep -q "CHECK apt neovim would install package neovim" ||
+    echo "$output" | grep -q "CHECK neovim would install upstream stable tarball to" ||
         fail "missing neovim check output"
     echo "$output" | grep -q "CHECK kitty would install official binary to" ||
         fail "missing kitty check output"
@@ -61,6 +62,46 @@ test_check_reports_missing_apps_without_installing() {
         fail "missing codex check output"
     [ ! -e "$WORK/home/.local/kitty.app" ] ||
         fail "--check created kitty install directory"
+}
+
+test_existing_wrong_neovim_is_skipped_without_force() {
+    write_platform
+    install_fake_command nvim
+
+    output=$(run_setup --check --app neovim 2>&1)
+
+    echo "$output" | grep -q "SKIP neovim installed at $WORK/bin/nvim; preferred managed install missing" ||
+        fail "existing non-managed neovim was not skipped"
+}
+
+test_managed_neovim_creates_safe_integration_plan() {
+    write_platform
+    mkdir -p "$WORK/home/.local/neovim/bin"
+    touch "$WORK/home/.local/neovim/bin/nvim"
+    chmod +x "$WORK/home/.local/neovim/bin/nvim"
+
+    output=$(run_setup --check --app neovim 2>&1)
+
+    echo "$output" | grep -q "OK neovim managed install present" ||
+        fail "managed neovim install not detected"
+    echo "$output" | grep -q "CHECK neovim would link $WORK/home/.local/bin/nvim" ||
+        fail "neovim symlink integration not planned"
+}
+
+test_unsupported_neovim_architecture_fails_clearly() {
+    write_platform
+    rm -rf "$WORK/home/.local/neovim"
+
+    SETUP_TEST_UNAME_M=riscv64
+    export SETUP_TEST_UNAME_M
+    if output=$(run_setup --check --force --app neovim 2>&1); then
+        unset SETUP_TEST_UNAME_M
+        fail "unsupported neovim architecture unexpectedly passed"
+    fi
+    unset SETUP_TEST_UNAME_M
+
+    echo "$output" | grep -q "setup: unsupported Neovim architecture 'riscv64'" ||
+        fail "unsupported neovim architecture error was not clear"
 }
 
 test_existing_wrong_kitty_is_skipped_without_force() {
@@ -127,6 +168,9 @@ EOF
 }
 
 test_check_reports_missing_apps_without_installing
+test_existing_wrong_neovim_is_skipped_without_force
+test_managed_neovim_creates_safe_integration_plan
+test_unsupported_neovim_architecture_fails_clearly
 test_existing_wrong_kitty_is_skipped_without_force
 test_managed_kitty_creates_safe_integration_plan
 test_codex_app_filter_is_supported

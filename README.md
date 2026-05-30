@@ -71,12 +71,12 @@ make kitty.verify
 ```
 
 `make setup` is for Ubuntu/Debian machines. It installs missing core prerequisites
-(`curl`, `git`, `npm`/Node, `jq`) plus Neovim via apt, Kitty via the official
-binary installer, Claude Code via npm (`@anthropic-ai/claude-code`), and Codex
-via npm (`@openai/codex`). It skips apps that already exist by default,
-especially when they appear to come from a different source than this repo
-prefers; pass `--force` through `SETUP_FLAGS` to opt into reinstall/update
-behavior.
+(`curl`, `git`, `unzip`, `npm`/Node, `jq`) plus Neovim from the latest upstream
+stable tarball into `~/.local/neovim`, Kitty via the official binary installer,
+Claude Code via npm (`@anthropic-ai/claude-code`), and Codex via npm
+(`@openai/codex`). It skips apps that already exist by default, especially when
+they appear to come from a different source than this repo prefers; pass
+`--force` through `SETUP_FLAGS` to opt into reinstall/update behavior.
 
 After dependency setup, the script runs the normal sync flow. The app-specific
 `make <app>` targets only link config files: `make neovim` links into
