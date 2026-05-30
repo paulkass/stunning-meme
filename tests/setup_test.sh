@@ -57,6 +57,8 @@ test_check_reports_missing_apps_without_installing() {
         fail "missing kitty check output"
     echo "$output" | grep -q "CHECK npm claude-code would install @anthropic-ai/claude-code globally" ||
         fail "missing claude-code check output"
+    echo "$output" | grep -q "CHECK npm codex would install @openai/codex globally" ||
+        fail "missing codex check output"
     [ ! -e "$WORK/home/.local/kitty.app" ] ||
         fail "--check created kitty install directory"
 }
@@ -85,6 +87,30 @@ test_managed_kitty_creates_safe_integration_plan() {
         fail "kitty symlink integration not planned"
 }
 
+test_codex_app_filter_is_supported() {
+    write_platform
+    install_fake_command curl
+    install_fake_command git
+    install_fake_command npm
+    install_fake_command node
+    install_fake_command jq
+
+    output=$(run_setup --check --app codex 2>&1)
+
+    echo "$output" | grep -q "CHECK npm codex would install @openai/codex globally" ||
+        fail "codex app filter did not plan npm install"
+}
+
+test_existing_codex_is_skipped_without_force() {
+    write_platform
+    install_fake_command codex
+
+    output=$(run_setup --check --app codex 2>&1)
+
+    echo "$output" | grep -q "SKIP codex installed at $WORK/bin/codex; preferred npm package @openai/codex missing" ||
+        fail "existing codex command was not skipped"
+}
+
 test_unsupported_platform_fails_clearly() {
     mkdir -p "$WORK/home" "$WORK/bin" "$WORK/apt-installed" "$WORK/npm-installed"
     cat >"$WORK/os-release" <<'EOF'
@@ -103,6 +129,8 @@ EOF
 test_check_reports_missing_apps_without_installing
 test_existing_wrong_kitty_is_skipped_without_force
 test_managed_kitty_creates_safe_integration_plan
+test_codex_app_filter_is_supported
+test_existing_codex_is_skipped_without_force
 test_unsupported_platform_fails_clearly
 
 echo "setup tests passed"

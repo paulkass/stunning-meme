@@ -36,6 +36,15 @@ so no plugin code is vendored here.
   - `sync` — symlinks these into `~/.claude`; `./sync verify` checks it. Because
     `~/.claude` also holds credentials and session state, only these tracked
     items are linked/backed up — never the whole directory, never credentials.
+- `codex/` — Codex CLI user-authored config.
+  - `config.toml` — global Codex preferences, trusted projects, enabled plugins,
+    sandbox policy, and shell environment policy.
+  - `rules/default.rules` — reusable command approval rules.
+  - `skills/` and `memories/` — optional user-authored portable content. Generated
+    system skills, sessions, auth, caches, logs, sqlite state, plugin cache, and
+    other runtime artifacts stay local under `~/.codex` and are not tracked.
+  - `sync` — links tracked files into `~/.codex` one file at a time; `./sync verify`
+    checks them. It never moves or backs up the whole `~/.codex` directory.
 - `kitty/` — Kitty terminal config, ported from a KDE Konsole setup.
   - `kitty.conf` — font (Hack 11pt), bottom tab bar, background opacity, and the
     16-color ANSI palette, captured from a running Konsole via OSC color queries
@@ -48,28 +57,37 @@ so no plugin code is vendored here.
 make setup                         # install missing apps, then sync configs
 make setup SETUP_FLAGS="--check"   # report planned actions without changing state
 make setup SETUP_FLAGS="--app kitty --force"
+make setup SETUP_FLAGS="--app codex"
 make                               # sync every app only
 make verify                        # verify every app's symlinks
 make neovim                        # sync just Neovim config
 make neovim.verify
 make claude-code                   # sync just Claude Code config
 make claude-code.verify
+make codex                         # sync just Codex config
+make codex.verify
 make kitty                         # sync just Kitty config
 make kitty.verify
 ```
 
 `make setup` is for Ubuntu/Debian machines. It installs missing core prerequisites
 (`curl`, `git`, `npm`/Node, `jq`) plus Neovim via apt, Kitty via the official
-binary installer, and Claude Code via npm (`@anthropic-ai/claude-code`). It skips
-apps that already exist by default, especially when they appear to come from a
-different source than this repo prefers; pass `--force` through `SETUP_FLAGS` to
-opt into reinstall/update behavior.
+binary installer, Claude Code via npm (`@anthropic-ai/claude-code`), and Codex
+via npm (`@openai/codex`). It skips apps that already exist by default,
+especially when they appear to come from a different source than this repo
+prefers; pass `--force` through `SETUP_FLAGS` to opt into reinstall/update
+behavior.
 
 After dependency setup, the script runs the normal sync flow. The app-specific
 `make <app>` targets only link config files: `make neovim` links into
 `~/.config/nvim`, `make claude-code` links tracked items into `~/.claude`,
-and `make kitty` links into `~/.config/kitty`, backing up displaced real config
-into `backups/<app>/<timestamp>/` first.
+`make codex` links tracked user-authored files into `~/.codex`, and `make kitty`
+links into `~/.config/kitty`, backing up displaced real config into
+`backups/<app>/<timestamp>/` first.
+
+Smoke tests are plain shell scripts: `sh tests/setup_test.sh` checks setup
+policy, and `sh tests/codex_sync_test.sh` checks the Codex sync migration against
+a temporary HOME.
 
 ## Git hooks
 

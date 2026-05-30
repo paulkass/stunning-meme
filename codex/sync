@@ -1,0 +1,109 @@
+#!/bin/sh
+# Sync user-authored Codex config into ~/.codex (symlinks), or verify it.
+#   ./sync          install / refresh the symlinks
+#   ./sync verify   check each tracked link still points back into this repo
+#
+# ~/.codex is a mixed directory containing credentials, sessions, caches, logs,
+# sqlite state, plugin cache, generated system skills, and user-authored config.
+# Link only repo-owned files item-by-item; never move or back up ~/.codex as a
+# whole.
+set -e
+
+SRC="$(cd "$(dirname "$0")" && pwd)"   # the codex/ dir in this repo
+DEST="$HOME/.codex"
+
+. "$SRC/../lib/backup.sh"               # provides repo_backup
+
+list_managed() {
+    [ -e "$SRC/config.toml" ] && printf '%s\n' "config.toml"
+    for dir in rules memories; do
+        [ -d "$SRC/$dir" ] || continue
+        find "$SRC/$dir" -type f | sort | sed "s|^$SRC/||"
+    done
+    if [ -d "$SRC/skills" ]; then
+        find "$SRC/skills" -path "$SRC/skills/.system" -prune -o -type f -print | sort | sed "s|^$SRC/||"
+    fi
+}
+
+verify_file() {
+    item=$1
+    link="$DEST/$item"
+    target="$SRC/$item"
+    if [ ! -L "$link" ]; then
+        echo "FAIL $link is not a symlink (run ./sync to fix)"
+        return 1
+    elif [ "$(readlink "$link")" != "$target" ]; then
+        echo "FAIL $link -> $(readlink "$link") (expected $target)"
+        return 1
+    elif [ ! -e "$link" ]; then
+        echo "FAIL $link is a dangling symlink -> $target (target missing)"
+        return 1
+    else
+        echo "OK   $link -> $target"
+        return 0
+    fi
+}
+
+with_managed_list() {
+    tmp=$(mktemp)
+    list_managed >"$tmp"
+    set +e
+    "$@" "$tmp"
+    rc=$?
+    set -e
+    rm -f "$tmp"
+    return "$rc"
+}
+
+verify() {
+    list=$1
+    rc=0
+    while IFS= read -r item; do
+        [ -n "$item" ] || continue
+        verify_file "$item" || rc=1
+    done <"$list"
+    return "$rc"
+}
+
+install_links() {
+    list=$1
+    mkdir -p "$DEST"
+
+    needs_backup=""
+    while IFS= read -r item; do
+        [ -n "$item" ] || continue
+        link="$DEST/$item"
+        if [ -e "$link" ] && [ "$(readlink "$link" 2>/dev/null)" != "$SRC/$item" ]; then
+            needs_backup="$needs_backup $link"
+        fi
+    done <"$list"
+    if [ -n "$needs_backup" ]; then
+        repo_backup "$SRC" codex $needs_backup
+    fi
+
+    while IFS= read -r item; do
+        [ -n "$item" ] || continue
+        mkdir -p "$(dirname "$DEST/$item")"
+        ln -sfn "$SRC/$item" "$DEST/$item"
+        echo "Linked $DEST/$item -> $SRC/$item"
+    done <"$list"
+}
+
+if [ "$1" = "verify" ]; then
+    with_managed_list verify
+    exit
+fi
+
+# Only ever install from the canonical master branch. A worktree or feature
+# branch checks out under a different branch name, and linking from one would
+# point ~/.codex at a path that vanishes when that checkout is removed —
+# leaving dangling links. Read-only verify (handled above) stays allowed
+# everywhere; pass FORCE=1 to override deliberately.
+branch=$(git -C "$SRC" symbolic-ref --short -q HEAD 2>/dev/null || true)
+if [ "${FORCE:-}" != "1" ] && [ -n "$branch" ] && [ "$branch" != "master" ]; then
+    echo "sync: refusing to install from branch '$branch' — run from master (the canonical checkout)." >&2
+    echo "sync: './sync verify' works anywhere; use FORCE=1 ./sync to override." >&2
+    exit 1
+fi
+
+with_managed_list install_links

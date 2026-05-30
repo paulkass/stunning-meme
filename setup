@@ -8,7 +8,7 @@ ROOT=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 CHECK=0
 FORCE=0
 APP_FILTER=""
-APP_ORDER="neovim kitty claude-code"
+APP_ORDER="neovim kitty claude-code codex"
 APT_UPDATED=0
 
 as_root() {
@@ -26,7 +26,7 @@ Usage: ./setup [--check] [--force] [--app NAME]
 Options:
   --check       Report planned actions without changing system state.
   --force       Reinstall/update managed tools instead of skipping mismatches.
-  --app NAME    Limit app setup to one app: neovim, kitty, or claude-code.
+  --app NAME    Limit app setup to one app: neovim, kitty, claude-code, or codex.
   -h, --help    Show this help.
 USAGE
 }
@@ -56,8 +56,8 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$APP_FILTER" in
-    ""|neovim|kitty|claude-code) ;;
-    *) err "setup: unknown app '$APP_FILTER' (expected neovim, kitty, or claude-code)"; exit 2 ;;
+    ""|neovim|kitty|claude-code|codex) ;;
+    *) err "setup: unknown app '$APP_FILTER' (expected neovim, kitty, claude-code, or codex)"; exit 2 ;;
 esac
 
 os_release_file() {
@@ -160,16 +160,17 @@ node_major_version() {
 }
 
 require_node_18() {
+    label=$1
     major=$(node_major_version 2>/dev/null || true)
     if [ -n "$major" ] && [ "$major" -ge 18 ]; then
         log "OK prereq node major version $major"
         return 0
     fi
     if [ "$CHECK" -eq 1 ]; then
-        log "CHECK prereq node must be version 18+ before installing Claude Code"
+        log "CHECK prereq node must be version 18+ before installing $label"
         return 0
     fi
-    err "setup: Claude Code requires Node 18+; install a newer nodejs/npm and re-run setup"
+    err "setup: $label requires Node 18+; install a newer nodejs/npm and re-run setup"
     exit 1
 }
 
@@ -313,7 +314,7 @@ install_kitty() {
 
 install_claude_code() {
     selected claude-code || return 0
-    require_node_18
+    require_node_18 "Claude Code"
     if npm_global_installed @anthropic-ai/claude-code; then
         log "OK npm claude-code package @anthropic-ai/claude-code installed"
         return 0
@@ -329,6 +330,26 @@ install_claude_code() {
     fi
     log "RUN npm install -g @anthropic-ai/claude-code"
     npm install -g @anthropic-ai/claude-code
+}
+
+install_codex() {
+    selected codex || return 0
+    require_node_18 "Codex"
+    if npm_global_installed @openai/codex; then
+        log "OK npm codex package @openai/codex installed"
+        return 0
+    fi
+    existing=$(command_path codex 2>/dev/null || true)
+    if [ -n "$existing" ] && [ "$FORCE" -ne 1 ]; then
+        log "SKIP codex installed at $existing; preferred npm package @openai/codex missing (use --force to install npm package)"
+        return 0
+    fi
+    if [ "$CHECK" -eq 1 ]; then
+        log "CHECK npm codex would install @openai/codex globally"
+        return 0
+    fi
+    log "RUN npm install -g @openai/codex"
+    npm install -g @openai/codex
 }
 
 sync_configs() {
@@ -350,6 +371,7 @@ install_app() {
         neovim) install_neovim ;;
         kitty) install_kitty ;;
         claude-code) install_claude_code ;;
+        codex) install_codex ;;
     esac
 }
 
