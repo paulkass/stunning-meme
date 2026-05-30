@@ -159,3 +159,6 @@ prefix_rule(
   decision = "prompt",
   justification = "Potentially destructive, privilege-changing, or network command.",
 )
+prefix_rule(pattern=["make"], decision="allow")
+prefix_rule(pattern=["git", "add"], decision="allow")
+prefix_rule(pattern=["git", "commit"], decision="allow")
